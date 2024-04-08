@@ -1,17 +1,17 @@
 mod graphql;
+mod models;
 
 // mod marcos;
-mod models;
 // mod schema;
 
 use std::{env, ops::DerefMut};
 
 use anyhow::Result;
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{EmptySubscription, Schema};
 use axum::{http::Method, routing::get, Router};
 use deadpool_postgres::{Manager, Pool};
 use firebase_auth::FirebaseAuth;
-use graphql::QueryRoot;
+use graphql::{MutationRoot, QueryRoot};
 use tokio::net::TcpListener;
 use tokio_postgres::{config::Config, NoTls};
 use tower_http::cors::{AllowOrigin, CorsLayer};
@@ -22,8 +22,9 @@ refinery::embed_migrations!("migrations");
 
 #[derive(Clone)]
 pub struct AppState {
+    #[allow(dead_code)]
     firebase_auth: FirebaseAuth,
-    schema: Schema<QueryRoot, EmptyMutation, EmptySubscription>,
+    schema: Schema<QueryRoot, MutationRoot, EmptySubscription>,
 }
 
 #[tokio::main]
@@ -52,10 +53,14 @@ async fn main() -> Result<()> {
         .init();
 
     println!("GraphiQL IDE: http://localhost:8080");
-    let schema = Schema::build(QueryRoot::default(), EmptyMutation, EmptySubscription)
-        .data(pool)
-        .data(_redis)
-        .finish();
+    let schema = Schema::build(
+        QueryRoot::default(),
+        MutationRoot::default(),
+        EmptySubscription,
+    )
+    .data(pool)
+    .data(_redis)
+    .finish();
 
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;
     let app = Router::new()

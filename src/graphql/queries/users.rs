@@ -5,10 +5,10 @@ use postgres_from_row::FromRow;
 use crate::models::users;
 
 #[derive(Default)]
-pub struct Users;
+pub struct UsersQueryRoot;
 
 #[Object]
-impl Users {
+impl UsersQueryRoot {
     #[graphql(name = "select_users")]
     async fn select_users(&self, context: &Context<'_>) -> FieldResult<Vec<users::User>> {
         let client = context.data::<Pool>()?.get().await?;
