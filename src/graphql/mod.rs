@@ -1,5 +1,6 @@
 pub mod mutations;
 pub mod queries;
+pub mod types;
 
 use async_graphql::{
     http::GraphiQLSource,
