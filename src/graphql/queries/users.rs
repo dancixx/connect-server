@@ -12,8 +12,9 @@ impl UsersQueryRoot {
     #[graphql(name = "select_users")]
     async fn select_users(&self, context: &Context<'_>) -> FieldResult<Vec<users::User>> {
         let client = context.data::<Pool>()?.get().await?;
-        let query = client.query("SELECT * FROM users", &[]).await?;
-        let users = query.iter().map(users::User::from_row).collect();
+        let query = format!("SELECT * FROM users");
+        let result = client.query(&query, &[]).await?;
+        let users = result.iter().map(users::User::from_row).collect();
         Ok(users)
     }
 }

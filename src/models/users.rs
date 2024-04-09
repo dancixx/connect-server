@@ -18,13 +18,19 @@ pub struct User {
     pub created_at: Timestamptz,
     #[graphql(name = "updated_at")]
     #[from_row(from = "Timestamptz")]
-    pub updated_at: Timestamptz,
+    pub updated_at: Option<Timestamptz>,
 }
 
 #[derive(InputObject)]
 pub struct InsertInput {
     #[graphql(name = "email")]
     pub email: String,
+    #[graphql(name = "name")]
+    pub name: String,
+}
+
+#[derive(InputObject)]
+pub struct UpdateInput {
     #[graphql(name = "name")]
     pub name: String,
 }
