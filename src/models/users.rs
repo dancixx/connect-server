@@ -18,7 +18,7 @@ pub struct User {
     pub created_at: Timestamptz,
     #[graphql(name = "updated_at")]
     #[from_row(from = "Timestamptz")]
-    pub updated_at: Option<Timestamptz>,
+    pub updated_at: Timestamptz,
 }
 
 #[derive(InputObject)]
