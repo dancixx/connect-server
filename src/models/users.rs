@@ -18,7 +18,7 @@ pub struct User {
     pub updated_at: SurrealDateTime,
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Serialize)]
 pub struct InsertInput {
     #[graphql(name = "email")]
     pub email: String,
@@ -26,7 +26,7 @@ pub struct InsertInput {
     pub name: String,
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Serialize)]
 pub struct UpdateInput {
     #[graphql(name = "name")]
     pub name: String,

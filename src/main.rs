@@ -1,13 +1,10 @@
 mod graphql;
 mod models;
 
-// mod marcos;
-// mod schema;
-
 use std::env;
 
 use anyhow::Result;
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{EmptySubscription, Schema};
 use axum::{http::Method, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{MutationRoot, QueryRoot};
@@ -19,7 +16,7 @@ use tower_http::cors::{AllowOrigin, CorsLayer};
 pub struct AppState {
     #[allow(dead_code)]
     firebase_auth: FirebaseAuth,
-    schema: Schema<QueryRoot, EmptyMutation, EmptySubscription>,
+    schema: Schema<QueryRoot, MutationRoot, EmptySubscription>,
 }
 
 #[tokio::main]
@@ -34,22 +31,29 @@ async fn main() -> Result<()> {
     // Sign in as root user
     surreal
         .signin(Root {
-            username: "root",
-            password: "root",
+            username: &env::var("SURREAL_ROOT_USER")?,
+            password: &env::var("SURREAL_ROOT_PASS")?,
         })
         .await?;
     // Create a new namespace
-    surreal.use_ns("connect").use_db("connect").await?;
+    surreal
+        .use_ns(&env::var("SURREAL_NS")?)
+        .use_db(&env::var("SURREAL_DB")?)
+        .await?;
 
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::WARN)
         .init();
 
     println!("GraphiQL IDE: http://localhost:8080");
-    let schema = Schema::build(QueryRoot::default(), EmptyMutation, EmptySubscription)
-        .data(_redis)
-        .data(surreal)
-        .finish();
+    let schema = Schema::build(
+        QueryRoot::default(),
+        MutationRoot::default(),
+        EmptySubscription,
+    )
+    .data(_redis)
+    .data(surreal)
+    .finish();
 
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;
     let app = Router::new()

@@ -1298,9 +1298,9 @@ checksum = "658bd65b1cf4c852a3cc96f18a8ce7b5640f6b703f905c7d74532294c2a63984"
 
 [[package]]
 name = "firebase-auth"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bd75b75a7d12143b59159451b5577118175a683758959b118fd1a0cba2e4546"
+checksum = "9876edaec3ace45d5ceb8bcc751eefa8aa480481f11917aed77abda57cdd0a42"
 dependencies = [
  "actix-web",
  "actix-web-httpauth",
