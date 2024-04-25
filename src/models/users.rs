@@ -27,7 +27,7 @@ pub struct InsertInput {
 }
 
 #[derive(InputObject, Serialize)]
-pub struct UpdateInput {
+pub struct UpdateSetInput {
     #[graphql(name = "name")]
     pub name: String,
 }
