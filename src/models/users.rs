@@ -1,27 +1,24 @@
 use async_graphql::{InputObject, SimpleObject};
 
-use postgres_from_row::FromRow;
 use serde::{Deserialize, Serialize};
 
-use crate::graphql::types::timestamptz::Timestamptz;
+use crate::graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID};
 
-#[derive(SimpleObject, FromRow, Serialize, Deserialize)]
+#[derive(SimpleObject, Serialize, Deserialize)]
 pub struct User {
     #[graphql(name = "id")]
-    pub id: i32,
+    pub id: SurrealID,
     #[graphql(name = "email")]
     pub email: String,
     #[graphql(name = "name")]
     pub name: String,
     #[graphql(name = "created_at")]
-    #[from_row(from = "Timestamptz")]
-    pub created_at: Timestamptz,
+    pub created_at: SurrealDateTime,
     #[graphql(name = "updated_at")]
-    #[from_row(from = "Timestamptz")]
-    pub updated_at: Timestamptz,
+    pub updated_at: SurrealDateTime,
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Serialize)]
 pub struct InsertInput {
     #[graphql(name = "email")]
     pub email: String,
@@ -29,7 +26,7 @@ pub struct InsertInput {
     pub name: String,
 }
 
-#[derive(InputObject)]
+#[derive(InputObject, Serialize)]
 pub struct UpdateInput {
     #[graphql(name = "name")]
     pub name: String,

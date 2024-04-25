@@ -1,6 +1,5 @@
 use async_graphql::{Context, FieldResult, Object};
-use deadpool_postgres::Pool;
-use postgres_from_row::FromRow;
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::models::users;
 
@@ -11,10 +10,8 @@ pub struct UsersQueryRoot;
 impl UsersQueryRoot {
     #[graphql(name = "select_users")]
     async fn select_users(&self, context: &Context<'_>) -> FieldResult<Vec<users::User>> {
-        let client = context.data::<Pool>()?.get().await?;
-        let query = format!("SELECT * FROM users");
-        let result = client.query(&query, &[]).await?;
-        let users = result.iter().map(users::User::from_row).collect();
+        let surreal = context.data::<Surreal<Client>>()?;
+        let users = surreal.select::<Vec<users::User>>("users").await?;
         Ok(users)
     }
 }
