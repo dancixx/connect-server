@@ -14,11 +14,12 @@ impl UsersMutationRoot {
     async fn insert_users_one(
         &self,
         context: &Context<'_>,
+        id: String,
         input: users::InsertInput,
     ) -> FieldResult<users::User> {
         let surreal = context.data::<Surreal<Client>>()?;
         let user = surreal
-            .create::<Vec<users::User>>("users")
+            .create::<Option<users::User>>(("users", id))
             .content(input)
             .await?;
         Ok(user.into_iter().next().unwrap())

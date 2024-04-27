@@ -4,7 +4,10 @@ mod models;
 use std::env;
 
 use anyhow::Result;
-use async_graphql::{EmptySubscription, Schema};
+use async_graphql::{
+    extensions::{Logger, Tracing},
+    EmptySubscription, Schema,
+};
 use axum::{http::Method, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{MutationRoot, QueryRoot};
@@ -22,28 +25,22 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenvy::dotenv().expect("Failed to load .env file");
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
 
-    // Initialize Redis
     let _redis = redis::Client::open(env::var("REDIS_URL")?)?;
-
-    // Initialize surrealdb
     let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await?;
-    // Sign in as root user
     surreal
         .signin(Root {
             username: &env::var("SURREAL_ROOT_USER")?,
             password: &env::var("SURREAL_ROOT_PASS")?,
         })
         .await?;
-    // Create a new namespace
     surreal
         .use_ns(&env::var("SURREAL_NS")?)
         .use_db(&env::var("SURREAL_DB")?)
         .await?;
-
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::WARN)
-        .init();
 
     println!("GraphiQL IDE: http://localhost:8080");
     let schema = Schema::build(
@@ -52,7 +49,8 @@ async fn main() -> Result<()> {
         EmptySubscription,
     )
     .data(_redis)
-    //.data(surreal)
+    .data(surreal)
+    .extension(Logger)
     .finish();
 
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;

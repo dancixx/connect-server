@@ -402,6 +402,7 @@ dependencies = [
  "handlebars",
  "http 1.1.0",
  "indexmap 2.2.6",
+ "log",
  "mime",
  "multer",
  "num-traits",

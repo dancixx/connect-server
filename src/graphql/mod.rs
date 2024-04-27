@@ -4,6 +4,8 @@ pub mod types;
 
 // use std::env;
 
+use std::env;
+
 // use anyhow::Result;
 use async_graphql::{http::GraphiQLSource, MergedObject, Response};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
@@ -37,6 +39,15 @@ pub async fn handler(
     headers: HeaderMap,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
+    let admin_secret = headers.get("x-connect-admin-secret");
+    let _admin_secret = env::var("ADMIN_SECRET").unwrap();
+
+    if let Some(admin_secret) = admin_secret {
+        if admin_secret == &_admin_secret {
+            return schema.execute(req.into_inner()).await.into();
+        }
+    }
+
     let auth = headers.get(AUTHORIZATION);
     match auth {
         Some(auth) => {
