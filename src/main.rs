@@ -4,10 +4,7 @@ mod models;
 use std::env;
 
 use anyhow::Result;
-use async_graphql::{
-    extensions::{Logger, Tracing},
-    EmptySubscription, Schema,
-};
+use async_graphql::{extensions::Logger, EmptySubscription, Schema};
 use axum::{http::Method, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{MutationRoot, QueryRoot};
