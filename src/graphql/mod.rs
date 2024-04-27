@@ -2,21 +2,22 @@ pub mod mutations;
 pub mod queries;
 pub mod types;
 
-use async_graphql::{
-    http::GraphiQLSource,
-    MergedObject,
-    //Response
-};
+// use std::env;
+
+// use anyhow::Result;
+use async_graphql::{http::GraphiQLSource, MergedObject, Response};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
     extract::State,
-    // http::{header::AUTHORIZATION, HeaderMap},
+    http::{header::AUTHORIZATION, HeaderMap},
     response::{Html, IntoResponse},
 };
-
-// use firebase_auth::FirebaseUser;
+use firebase_auth::FirebaseUser;
+// use surrealdb::{engine::remote::ws::Ws, opt::auth::Scope, sql::Thing, Surreal};
 
 use crate::AppState;
+
+// use self::types::surreal_id::SurrealID;
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(queries::users::UsersQueryRoot);
@@ -30,34 +31,48 @@ pub async fn playground() -> impl IntoResponse {
 
 pub async fn handler(
     State(AppState {
-        firebase_auth: _,
+        firebase_auth,
         schema,
     }): State<AppState>,
-    //headers: HeaderMap,
+    headers: HeaderMap,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    // let auth = headers.get(AUTHORIZATION);
-    schema.execute(req.into_inner()).await.into()
-    // match auth {
-    //     Some(auth) => {
-    //         let auth_header = auth.to_str().unwrap();
-    //         if auth_header.is_empty() {
-    //             return GraphQLResponse::from(Response::new("Token is empty"));
-    //         }
+    let auth = headers.get(AUTHORIZATION);
+    match auth {
+        Some(auth) => {
+            let auth_header = auth.to_str().unwrap();
+            if auth_header.is_empty() {
+                return GraphQLResponse::from(Response::new("Token is empty"));
+            }
 
-    //         let prefix_len = "Bearer ".len();
-    //         if auth_header.len() <= prefix_len {
-    //             return GraphQLResponse::from(Response::new("Token is empty"));
-    //         }
+            let prefix_len = "Bearer ".len();
+            if auth_header.len() <= prefix_len {
+                return GraphQLResponse::from(Response::new("Token is empty"));
+            }
 
-    //         let token = auth_header[prefix_len..].to_string();
-    //         match firebase_auth.verify::<FirebaseUser>(&token) {
-    //             Ok(_) => schema.execute(req.into_inner()).await.into(),
-    //             Err(_) => return GraphQLResponse::from(Response::new("Invalid token")),
-    //         }
-    //     }
-    //     None => {
-    //         return GraphQLResponse::from(Response::new("No Authorization header"));
-    //     }
-    // }
+            let token = auth_header[prefix_len..].to_string();
+            match firebase_auth.verify::<FirebaseUser>(&token) {
+                Ok(_firebase_user) => {
+                    // let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await.unwrap();
+                    // surreal
+                    //     .signin(Scope {
+                    //         namespace: &env::var("SURREAL_NS").unwrap(),
+                    //         database: &env::var("SURREAL_DB").unwrap(),
+                    //         scope: "account",
+                    //         params: SurrealID(Thing {
+                    //             tb: String::from("users"),
+                    //             id: firebase_user.user_id.into(),
+                    //         }),
+                    //     })
+                    //     .await
+                    //     .unwrap();
+                    schema.execute(req.into_inner()).await.into()
+                }
+                Err(_) => return GraphQLResponse::from(Response::new("Invalid token")),
+            }
+        }
+        None => {
+            return GraphQLResponse::from(Response::new("No Authorization header"));
+        }
+    }
 }

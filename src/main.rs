@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
         EmptySubscription,
     )
     .data(_redis)
-    .data(surreal)
+    //.data(surreal)
     .finish();
 
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;

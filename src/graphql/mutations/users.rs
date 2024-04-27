@@ -3,7 +3,7 @@ use itertools::Itertools;
 use serde_json::json;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{graphql, models::users};
+use crate::models::users;
 
 #[derive(Default)]
 pub struct UsersMutationRoot;
