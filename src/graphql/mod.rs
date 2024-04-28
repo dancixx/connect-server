@@ -19,7 +19,7 @@ use firebase_auth::FirebaseUser;
 
 use crate::AppState;
 
-// use self::types::surreal_id::SurrealID;
+use self::types::UserID;
 
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(queries::users::UsersQueryRoot);
@@ -62,8 +62,9 @@ pub async fn handler(
             }
 
             let token = auth_header[prefix_len..].to_string();
+
             match firebase_auth.verify::<FirebaseUser>(&token) {
-                Ok(_firebase_user) => {
+                Ok(firebase_user) => {
                     // let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await.unwrap();
                     // surreal
                     //     .signin(Scope {
@@ -77,7 +78,10 @@ pub async fn handler(
                     //     })
                     //     .await
                     //     .unwrap();
-                    schema.execute(req.into_inner()).await.into()
+                    schema
+                        .execute(req.into_inner().data(UserID(firebase_user.user_id)))
+                        .await
+                        .into()
                 }
                 Err(_) => return GraphQLResponse::from(Response::new("Invalid token")),
             }
