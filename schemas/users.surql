@@ -3,9 +3,11 @@ DEFINE TABLE users SCHEMAFULL PERMISSIONS NONE;
     --     FOR create NONE
     --     FOR select, update, delete WHERE id = $auth.id;
 
-DEFINE FIELD name ON users TYPE string;
 DEFINE FIELD email ON users TYPE string
     ASSERT string::is::email($value);
+DEFINE FIELD name ON users TYPE string | null DEFAULT null;
+DEFINE FIELD last_name ON users TYPE string | null DEFAULT null;
+DEFINE FIELD first_name ON users TYPE string | null DEFAULT null;
 DEFINE FIELD created_at ON users TYPE datetime DEFAULT time::now();
 DEFINE FIELD updated_at ON users TYPE datetime VALUE time::now();
 

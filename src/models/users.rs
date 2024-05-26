@@ -11,7 +11,11 @@ pub struct User {
     #[graphql(name = "email")]
     pub email: String,
     #[graphql(name = "name")]
-    pub name: String,
+    pub name: Option<String>,
+    #[graphql(name = "last_name")]
+    pub last_name: Option<String>,
+    #[graphql(name = "first_name")]
+    pub first_name: Option<String>,
     #[graphql(name = "created_at")]
     pub created_at: SurrealDateTime,
     #[graphql(name = "updated_at")]
@@ -19,14 +23,16 @@ pub struct User {
 }
 
 #[derive(InputObject, Serialize)]
+#[graphql(name = "users_insert_input")]
 pub struct InsertInput {
     #[graphql(name = "email")]
     pub email: String,
     #[graphql(name = "name")]
-    pub name: String,
+    pub name: Option<String>,
 }
 
 #[derive(InputObject, Serialize)]
+#[graphql(name = "users_update_set_input")]
 pub struct UpdateSetInput {
     #[graphql(name = "name")]
     pub name: String,
