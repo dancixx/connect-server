@@ -10,10 +10,8 @@ impl ScalarType for SurrealID {
     fn parse(value: async_graphql::Value) -> async_graphql::InputValueResult<Self> {
         if let async_graphql::Value::String(value) = value {
             let value = value.split(':').collect::<Vec<&str>>();
-            Ok(Self(Thing {
-                tb: value[0].to_string(),
-                id: value[1].into(),
-            }))
+            let thing = Thing::from((value[0], value[1]));
+            Ok(Self(thing))
         } else {
             Err(async_graphql::InputValueError::expected_type(value))
         }

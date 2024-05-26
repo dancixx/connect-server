@@ -9,6 +9,7 @@ use axum::{http::Method, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{MutationRoot, QueryRoot};
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
+use surrealdb_migrations::MigrationRunner;
 use tokio::net::TcpListener;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 
@@ -23,6 +24,9 @@ pub struct AppState {
 async fn main() -> Result<()> {
     dotenvy::dotenv().expect("Failed to load .env file");
     tracing_subscriber::fmt()
+        .with_file(true)
+        .with_line_number(true)
+        .with_level(true)
         .with_max_level(tracing::Level::INFO)
         .init();
 
@@ -34,12 +38,20 @@ async fn main() -> Result<()> {
             password: &env::var("SURREAL_ROOT_PASS")?,
         })
         .await?;
+    tracing::info!("Signed in to surreal");
     surreal
         .use_ns(&env::var("SURREAL_NS")?)
         .use_db(&env::var("SURREAL_DB")?)
         .await?;
 
-    println!("GraphiQL IDE: http://localhost:8080");
+    // Apply new migrations
+    MigrationRunner::new(&surreal).up().await.unwrap();
+
+    // List applied migrations
+    let applied_migrations = MigrationRunner::new(&surreal).list().await.unwrap();
+    tracing::info!("Applied migrations: {:?}", applied_migrations);
+
+    tracing::info!("GraphiQL IDE: http://localhost:8080");
     let schema = Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),

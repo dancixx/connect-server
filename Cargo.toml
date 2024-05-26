@@ -14,13 +14,14 @@ chrono = { version = "0.4.37", features = ["serde"] }
 dotenvy = "0.15.7"
 firebase-auth = { version = "0.4.3", features = ["axum"] }
 futures = "0.3.30"
-itertools = "0.12.1"
+itertools = "0.13.0"
 jsonwebtoken = "9.3.0"
 redis = { version = "0.25.2", features = ["tokio-comp", "tokio-rustls-comp", "aio"] }
 redis-derive = "0.1.7"
 serde = "1.0.197"
 serde_json = "1.0.115"
-surrealdb = "1.4.2"
+surrealdb = "1.5.1"
+surrealdb-migrations = "1.5.0"
 tokio = { version = "1.37.0", features = ["full"] }
 tokio-stream = "0.1.15"
 tower-http = { version = "0.5.2", features = ["cors"] }

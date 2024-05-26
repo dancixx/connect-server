@@ -53,11 +53,13 @@ pub async fn handler(
         Some(auth) => {
             let auth_header = auth.to_str().unwrap();
             if auth_header.is_empty() {
+                tracing::info!("Token is empty");
                 return GraphQLResponse::from(Response::new("Token is empty"));
             }
 
             let prefix_len = "Bearer ".len();
             if auth_header.len() <= prefix_len {
+                tracing::info!("Token is empty");
                 return GraphQLResponse::from(Response::new("Token is empty"));
             }
 
@@ -83,11 +85,15 @@ pub async fn handler(
                         .await
                         .into()
                 }
-                Err(_) => return GraphQLResponse::from(Response::new("Invalid token")),
+                Err(_) => {
+                    tracing::info!("Invalid token");
+                    GraphQLResponse::from(Response::new("Invalid token"))
+                }
             }
         }
         None => {
-            return GraphQLResponse::from(Response::new("No Authorization header"));
+            tracing::info!("No Authorization header");
+            GraphQLResponse::from(Response::new("No Authorization header"))
         }
     }
 }
