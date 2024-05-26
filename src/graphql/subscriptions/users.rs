@@ -21,7 +21,7 @@ impl UsersSubscriptionRoot {
         &self,
         context: &Context<'_>,
         id: String,
-    ) -> impl Stream<Item = User> + 'a {
+    ) -> impl Stream<Item = Option<User>> + 'a {
         let surreal = context.data::<Surreal<Client>>().unwrap();
         let surreal = Arc::new(RwLock::new(surreal.clone()));
         let SurrealID(thing) = SurrealID::from(id);
@@ -46,13 +46,20 @@ impl UsersSubscriptionRoot {
                                 surreal.select::<Option<User>>(("users", id)).await.unwrap();
 
                             let mut user = user.lock().unwrap();
-                            *user = query;
+
+                            query.is_some().then(|| {
+                                *user = query;
+                            });
                         });
                     }
                 });
 
                 let mut user = user.lock().unwrap();
-                mem::take(&mut *user).unwrap()
+
+                if user.is_none() {
+                    return None;
+                };
+                mem::take(&mut *user)
             })
     }
 }

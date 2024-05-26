@@ -83,10 +83,10 @@ async fn main() -> Result<()> {
                 .allow_methods([Method::GET, Method::POST]),
         )
         .layer(TraceLayer::new_for_http())
-        .layer(middleware::from_fn_with_state(
-            app_state.clone(),
-            graphql::auth_handler,
-        ))
+        // .layer(middleware::from_fn_with_state(
+        //     app_state.clone(),
+        //     graphql::auth_handler,
+        // ))
         .with_state(app_state);
 
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
