@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     let _redis = redis::Client::open(env::var("REDIS_URL")?)?;
     let surreal = surreal::init().await?;
 
-    // surreal::run_migrations(&surreal).await?;
+    surreal::run_migrations(&surreal).await?;
 
     tracing::info!("GraphiQL IDE: http://localhost:8080");
     let schema = Schema::build(
