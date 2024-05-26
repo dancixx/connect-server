@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID};
 
-#[derive(SimpleObject, Serialize, Deserialize)]
+#[derive(SimpleObject, Serialize, Deserialize, Default, Debug)]
 pub struct User {
     #[graphql(name = "id")]
     pub id: SurrealID,

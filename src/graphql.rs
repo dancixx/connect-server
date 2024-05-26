@@ -1,5 +1,6 @@
 pub mod mutations;
 pub mod queries;
+pub mod subscriptions;
 pub mod types;
 
 // use std::env;
@@ -7,44 +8,39 @@ pub mod types;
 use std::env;
 
 // use anyhow::Result;
-use async_graphql::{http::GraphiQLSource, MergedObject, Response};
-use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use async_graphql::http::GraphiQLSource;
 use axum::{
-    extract::State,
+    extract::{Request, State},
     http::{header::AUTHORIZATION, HeaderMap},
-    response::{Html, IntoResponse},
+    middleware::Next,
+    response::{Html, IntoResponse, Response},
 };
 use firebase_auth::FirebaseUser;
 // use surrealdb::{engine::remote::ws::Ws, opt::auth::Scope, sql::Thing, Surreal};
 
 use crate::AppState;
 
-use self::types::UserID;
-
-#[derive(MergedObject, Default)]
-pub struct QueryRoot(queries::users::UsersQueryRoot);
-
-#[derive(MergedObject, Default)]
-pub struct MutationRoot(mutations::users::UsersMutationRoot);
-
-pub async fn playground() -> impl IntoResponse {
-    Html(GraphiQLSource::build().endpoint("/").finish())
+pub async fn graphiql() -> impl IntoResponse {
+    Html(
+        GraphiQLSource::build()
+            .endpoint("/")
+            .subscription_endpoint("/ws")
+            .finish(),
+    )
 }
 
-pub async fn handler(
-    State(AppState {
-        firebase_auth,
-        schema,
-    }): State<AppState>,
+pub async fn auth_handler(
+    State(AppState { firebase_auth, .. }): State<AppState>,
     headers: HeaderMap,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
+    req: Request,
+    next: Next,
+) -> Response {
     let admin_secret = headers.get("x-connect-admin-secret");
     let _admin_secret = env::var("ADMIN_SECRET").unwrap();
 
     if let Some(admin_secret) = admin_secret {
         if admin_secret == &_admin_secret {
-            return schema.execute(req.into_inner()).await.into();
+            return next.run(req).await;
         }
     }
 
@@ -54,19 +50,19 @@ pub async fn handler(
             let auth_header = auth.to_str().unwrap();
             if auth_header.is_empty() {
                 tracing::info!("Token is empty");
-                return GraphQLResponse::from(Response::new("Token is empty"));
+                return Response::new("Token is empty".into());
             }
 
             let prefix_len = "Bearer ".len();
             if auth_header.len() <= prefix_len {
                 tracing::info!("Token is empty");
-                return GraphQLResponse::from(Response::new("Token is empty"));
+                return Response::new("Token is empty".into());
             }
 
             let token = auth_header[prefix_len..].to_string();
 
             match firebase_auth.verify::<FirebaseUser>(&token) {
-                Ok(firebase_user) => {
+                Ok(_) => {
                     // let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await.unwrap();
                     // surreal
                     //     .signin(Scope {
@@ -80,20 +76,17 @@ pub async fn handler(
                     //     })
                     //     .await
                     //     .unwrap();
-                    schema
-                        .execute(req.into_inner().data(UserID(firebase_user.user_id)))
-                        .await
-                        .into()
+                    next.run(req).await
                 }
                 Err(_) => {
                     tracing::info!("Invalid token");
-                    GraphQLResponse::from(Response::new("Invalid token"))
+                    Response::new("Invalid token".into())
                 }
             }
         }
         None => {
             tracing::info!("No Authorization header");
-            GraphQLResponse::from(Response::new("No Authorization header"))
+            Response::new("No Authorization header".into())
         }
     }
 }

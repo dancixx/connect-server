@@ -4,20 +4,23 @@ mod models;
 use std::env;
 
 use anyhow::Result;
-use async_graphql::{extensions::Logger, EmptySubscription, Schema};
-use axum::{http::Method, routing::get, Router};
+use async_graphql::{extensions::Logger, Schema};
+use async_graphql_axum::{GraphQL, GraphQLSubscription};
+use axum::{http::Method, middleware, routing::get, Router};
 use firebase_auth::FirebaseAuth;
-use graphql::{MutationRoot, QueryRoot};
+use graphql::{mutations::MutationRoot, queries::QueryRoot, subscriptions::SubscriptionRoot};
 use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
 use surrealdb_migrations::MigrationRunner;
 use tokio::net::TcpListener;
-use tower_http::cors::{AllowOrigin, CorsLayer};
+use tower_http::{
+    cors::{AllowOrigin, CorsLayer},
+    trace::TraceLayer,
+};
 
 #[derive(Clone)]
 pub struct AppState {
     #[allow(dead_code)]
     firebase_auth: FirebaseAuth,
-    schema: Schema<QueryRoot, MutationRoot, EmptySubscription>,
 }
 
 #[tokio::main]
@@ -44,18 +47,22 @@ async fn main() -> Result<()> {
         .use_db(&env::var("SURREAL_DB")?)
         .await?;
 
-    // Apply new migrations
-    MigrationRunner::new(&surreal).up().await.unwrap();
+    if env::var("CARGO_WATCH").is_ok() {
+        tracing::info!("Cargo watch enabled, skipping migration list");
+    } else {
+        // Apply new migrations
+        MigrationRunner::new(&surreal).up().await.unwrap();
 
-    // List applied migrations
-    let applied_migrations = MigrationRunner::new(&surreal).list().await.unwrap();
-    tracing::info!("Applied migrations: {:?}", applied_migrations);
+        // List applied migrations
+        let applied_migrations = MigrationRunner::new(&surreal).list().await.unwrap();
+        tracing::info!("Applied migrations: {:?}", applied_migrations);
+    }
 
     tracing::info!("GraphiQL IDE: http://localhost:8080");
     let schema = Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
-        EmptySubscription,
+        SubscriptionRoot::default(),
     )
     .data(_redis)
     .data(surreal)
@@ -63,17 +70,24 @@ async fn main() -> Result<()> {
     .finish();
 
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;
+    let app_state = AppState { firebase_auth };
     let app = Router::new()
-        .route("/", get(graphql::playground).post(graphql::handler))
-        .with_state(AppState {
-            firebase_auth,
-            schema,
-        })
+        .route(
+            "/",
+            get(graphql::graphiql).post_service(GraphQL::new(schema.clone())),
+        )
+        .route_service("/ws", GraphQLSubscription::new(schema.clone()))
         .layer(
             CorsLayer::new()
                 .allow_origin(AllowOrigin::predicate(|_, _| true))
                 .allow_methods([Method::GET, Method::POST]),
-        );
+        )
+        .layer(TraceLayer::new_for_http())
+        .layer(middleware::from_fn_with_state(
+            app_state.clone(),
+            graphql::auth_handler,
+        ))
+        .with_state(app_state);
 
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
     tracing::debug!("listening on {}", listener.local_addr()?);

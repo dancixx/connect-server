@@ -2,7 +2,7 @@ use async_graphql::{InputValueError, InputValueResult, Scalar, ScalarType, Value
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct SurrealDateTime(Option<DateTime<Utc>>);
 
 #[Scalar]
