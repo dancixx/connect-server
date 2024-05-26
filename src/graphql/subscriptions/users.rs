@@ -1,12 +1,8 @@
-use std::{
-    mem,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 use async_graphql::{Context, Subscription};
 use surrealdb::{engine::remote::ws::Client, Surreal};
-use tokio::{runtime::Handle, sync::RwLock};
+use tokio::sync::RwLock;
 use tokio_stream::{Stream, StreamExt};
 
 use crate::{graphql::types::surreal_id::SurrealID, models::users::User};
@@ -27,39 +23,17 @@ impl UsersSubscriptionRoot {
         let SurrealID(thing) = SurrealID::from(id);
 
         tokio_stream::wrappers::IntervalStream::new(tokio::time::interval(Duration::from_secs(1)))
-            .map(move |_| {
-                let id = thing.id.clone();
-                let user = Arc::new(Mutex::<Option<User>>::new(None));
+            .then(move |_| {
                 let surreal = surreal.clone();
+                let id = thing.id.clone();
 
-                tokio::task::block_in_place({
-                    let user = user.clone();
-                    let surreal = surreal.clone();
-
-                    move || {
-                        let user = user.clone();
-                        let surreal = surreal.clone();
-
-                        Handle::current().block_on(async move {
-                            let surreal = surreal.read().await;
-                            let query =
-                                surreal.select::<Option<User>>(("users", id)).await.unwrap();
-
-                            let mut user = user.lock().unwrap();
-
-                            query.is_some().then(|| {
-                                *user = query;
-                            });
-                        });
+                async move {
+                    let surreal = surreal.read().await;
+                    match surreal.select::<Option<User>>(("users", id.clone())).await {
+                        Ok(Some(user)) => Some(user),
+                        _ => None,
                     }
-                });
-
-                let mut user = user.lock().unwrap();
-
-                if user.is_none() {
-                    return None;
-                };
-                mem::take(&mut *user)
+                }
             })
     }
 }
