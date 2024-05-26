@@ -1,5 +1,6 @@
 mod graphql;
 mod models;
+mod surreal;
 
 use std::env;
 
@@ -9,8 +10,6 @@ use async_graphql_axum::{GraphQL, GraphQLSubscription};
 use axum::{http::Method, middleware, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{mutations::MutationRoot, queries::QueryRoot, subscriptions::SubscriptionRoot};
-use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
-use surrealdb_migrations::MigrationRunner;
 use tokio::net::TcpListener;
 use tower_http::{
     cors::{AllowOrigin, CorsLayer},
@@ -34,29 +33,9 @@ async fn main() -> Result<()> {
         .init();
 
     let _redis = redis::Client::open(env::var("REDIS_URL")?)?;
-    let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await?;
-    surreal
-        .signin(Root {
-            username: &env::var("SURREAL_ROOT_USER")?,
-            password: &env::var("SURREAL_ROOT_PASS")?,
-        })
-        .await?;
-    tracing::info!("Signed in to surreal");
-    surreal
-        .use_ns(&env::var("SURREAL_NS")?)
-        .use_db(&env::var("SURREAL_DB")?)
-        .await?;
+    let surreal = surreal::init().await?;
 
-    if env::var("CARGO_WATCH").is_ok() {
-        tracing::info!("Cargo watch enabled, skipping migration list");
-    } else {
-        // Apply new migrations
-        MigrationRunner::new(&surreal).up().await.unwrap();
-
-        // List applied migrations
-        let applied_migrations = MigrationRunner::new(&surreal).list().await.unwrap();
-        tracing::info!("Applied migrations: {:?}", applied_migrations);
-    }
+    // surreal::run_migrations(&surreal).await?;
 
     tracing::info!("GraphiQL IDE: http://localhost:8080");
     let schema = Schema::build(
@@ -83,10 +62,10 @@ async fn main() -> Result<()> {
                 .allow_methods([Method::GET, Method::POST]),
         )
         .layer(TraceLayer::new_for_http())
-        // .layer(middleware::from_fn_with_state(
-        //     app_state.clone(),
-        //     graphql::auth_handler,
-        // ))
+        .layer(middleware::from_fn_with_state(
+            app_state.clone(),
+            graphql::auth_handler,
+        ))
         .with_state(app_state);
 
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
