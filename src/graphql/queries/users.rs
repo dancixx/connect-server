@@ -23,9 +23,7 @@ impl UsersQueryRoot {
     ) -> FieldResult<Option<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let SurrealID(thing) = SurrealID::from(id);
-        let user = surreal
-            .select::<Option<users::User>>(("users", thing.id))
-            .await?;
+        let user = surreal.select::<Option<users::User>>(thing).await?;
         Ok(user)
     }
 }

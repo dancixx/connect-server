@@ -1,9 +1,8 @@
 use async_graphql::{Context, FieldResult, Object};
-use itertools::Itertools;
 use serde_json::json;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::models::users;
+use crate::{graphql::types::surreal_id::SurrealID, models::users};
 
 #[derive(Default)]
 pub struct UsersMutationRoot;
@@ -18,8 +17,9 @@ impl UsersMutationRoot {
         input: users::InsertInput,
     ) -> FieldResult<users::User> {
         let surreal = context.data::<Surreal<Client>>()?;
+        let SurrealID(thing) = SurrealID::from(id);
         let user = surreal
-            .create::<Option<users::User>>(("users", id))
+            .create::<Option<users::User>>(thing)
             .content(input)
             .await?;
         Ok(user.into_iter().next().unwrap())
@@ -33,9 +33,9 @@ impl UsersMutationRoot {
         #[graphql(name = "_set")] _set: users::UpdateSetInput,
     ) -> FieldResult<users::User> {
         let surreal = context.data::<Surreal<Client>>()?;
-        let surreal_id = id.split(':').collect_tuple::<(&str, &str)>().unwrap();
+        let SurrealID(thing) = SurrealID::from(id);
         let user = surreal
-            .update::<Option<users::User>>(surreal_id)
+            .update::<Option<users::User>>(thing)
             .merge(json!(_set))
             .await?;
         Ok(user.unwrap())
@@ -48,8 +48,8 @@ impl UsersMutationRoot {
         id: String,
     ) -> FieldResult<users::User> {
         let surreal = context.data::<Surreal<Client>>()?;
-        let surreal_id = id.split(':').collect_tuple::<(&str, &str)>().unwrap();
-        let user = surreal.delete::<Option<users::User>>(surreal_id).await?;
+        let SurrealID(thing) = SurrealID::from(id);
+        let user = surreal.delete::<Option<users::User>>(thing).await?;
         Ok(user.unwrap())
     }
 }

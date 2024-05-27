@@ -25,29 +25,15 @@ impl UsersSubscriptionRoot {
     ) -> impl Stream<Item = Option<User>> + 'a {
         let surreal = context.data::<Surreal<Client>>().unwrap();
         let SurrealID(thing) = SurrealID::from(id);
-        let initial_data = surreal
-            .select::<Option<User>>(("users", thing.id.clone()))
-            .await
-            .unwrap();
-
-        let stream = surreal
-            .select::<Option<User>>(("users", thing.id.clone()))
-            .live()
-            .await
-            .unwrap();
+        let initial_data = surreal.select::<Option<User>>(&thing).await.unwrap();
+        let stream = surreal.select::<Option<User>>(&thing).live().await.unwrap();
 
         stream! {
             yield initial_data;
 
-            // Works both ways but here needs to be mut stream
-            // while let Some(result) = stream.next().await {
-            //     yield handle(result);
-            // }
-
             for await result in stream {
                 yield handle(result);
             }
-
         }
     }
 }

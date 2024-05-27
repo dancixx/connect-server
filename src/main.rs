@@ -7,7 +7,14 @@ use std::env;
 use anyhow::Result;
 use async_graphql::{extensions::Logger, Schema};
 use async_graphql_axum::{GraphQL, GraphQLSubscription};
-use axum::{http::Method, middleware, routing::get, Router};
+use axum::{
+    extract::WebSocketUpgrade,
+    http::{HeaderMap, Method},
+    middleware,
+    response::IntoResponse,
+    routing::get,
+    Router,
+};
 use firebase_auth::FirebaseAuth;
 use graphql::{mutations::MutationRoot, queries::QueryRoot, subscriptions::SubscriptionRoot};
 use tokio::net::TcpListener;
@@ -55,6 +62,10 @@ async fn main() -> Result<()> {
             "/",
             get(graphql::graphiql).post_service(GraphQL::new(schema.clone())),
         )
+        .route_layer(middleware::from_fn_with_state(
+            app_state.clone(),
+            graphql::auth_handler,
+        ))
         .route_service("/ws", GraphQLSubscription::new(schema.clone()))
         .layer(
             CorsLayer::new()
@@ -62,10 +73,6 @@ async fn main() -> Result<()> {
                 .allow_methods([Method::GET, Method::POST]),
         )
         .layer(TraceLayer::new_for_http())
-        // .layer(middleware::from_fn_with_state(
-        //     app_state.clone(),
-        //     graphql::auth_handler,
-        // ))
         .with_state(app_state);
 
     let listener = TcpListener::bind("127.0.0.1:8080").await?;
