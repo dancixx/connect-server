@@ -3,11 +3,8 @@ pub mod queries;
 pub mod subscriptions;
 pub mod types;
 
-// use std::env;
-
 use std::env;
 
-// use anyhow::Result;
 use async_graphql::http::GraphiQLSource;
 use axum::{
     extract::{Request, State},
@@ -16,7 +13,6 @@ use axum::{
     response::{Html, IntoResponse, Response},
 };
 use firebase_auth::FirebaseUser;
-// use surrealdb::{engine::remote::ws::Ws, opt::auth::Scope, sql::Thing, Surreal};
 
 use crate::AppState;
 
@@ -62,22 +58,7 @@ pub async fn auth_handler(
             let token = auth_header[prefix_len..].to_string();
 
             match firebase_auth.verify::<FirebaseUser>(&token) {
-                Ok(_) => {
-                    // let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await.unwrap();
-                    // surreal
-                    //     .signin(Scope {
-                    //         namespace: &env::var("SURREAL_NS").unwrap(),
-                    //         database: &env::var("SURREAL_DB").unwrap(),
-                    //         scope: "account",
-                    //         params: SurrealID(Thing {
-                    //             tb: String::from("users"),
-                    //             id: firebase_user.user_id.into(),
-                    //         }),
-                    //     })
-                    //     .await
-                    //     .unwrap();
-                    next.run(req).await
-                }
+                Ok(_) => next.run(req).await,
                 Err(_) => {
                     tracing::info!("Invalid token");
                     Response::new("Invalid token".into())
