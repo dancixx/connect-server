@@ -6,15 +6,7 @@ use std::env;
 
 use anyhow::Result;
 use async_graphql::{extensions::Logger, Schema};
-use async_graphql_axum::{GraphQL, GraphQLSubscription};
-use axum::{
-    extract::WebSocketUpgrade,
-    http::{HeaderMap, Method},
-    middleware,
-    response::IntoResponse,
-    routing::get,
-    Router,
-};
+use axum::{http::Method, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{mutations::MutationRoot, queries::QueryRoot, subscriptions::SubscriptionRoot};
 use tokio::net::TcpListener;
@@ -23,10 +15,12 @@ use tower_http::{
     trace::TraceLayer,
 };
 
+pub type GraphqlSchema = Schema<QueryRoot, MutationRoot, SubscriptionRoot>;
+
 #[derive(Clone)]
 pub struct AppState {
-    #[allow(dead_code)]
     firebase_auth: FirebaseAuth,
+    schema: GraphqlSchema,
 }
 
 #[tokio::main]
@@ -42,9 +36,10 @@ async fn main() -> Result<()> {
     let _redis = redis::Client::open(env::var("REDIS_URL")?)?;
     let surreal = surreal::init().await?;
 
-    surreal::run_migrations(&surreal).await?;
+    //surreal::run_migrations(&surreal).await?;
 
     tracing::info!("GraphiQL IDE: http://localhost:8080");
+    let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;
     let schema = Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
@@ -52,21 +47,17 @@ async fn main() -> Result<()> {
     )
     .data(_redis)
     .data(surreal)
+    .data(firebase_auth.clone())
     .extension(Logger)
     .finish();
 
-    let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;
-    let app_state = AppState { firebase_auth };
+    let app_state = AppState {
+        firebase_auth,
+        schema,
+    };
     let app = Router::new()
-        .route(
-            "/",
-            get(graphql::graphiql).post_service(GraphQL::new(schema.clone())),
-        )
-        .route_layer(middleware::from_fn_with_state(
-            app_state.clone(),
-            graphql::auth_handler,
-        ))
-        .route_service("/ws", GraphQLSubscription::new(schema.clone()))
+        .route("/", get(graphql::graphiql).post(graphql::http_handler))
+        .route("/ws", get(graphql::ws_handler))
         .layer(
             CorsLayer::new()
                 .allow_origin(AllowOrigin::predicate(|_, _| true))

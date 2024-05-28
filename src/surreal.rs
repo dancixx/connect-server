@@ -27,10 +27,10 @@ pub async fn init() -> Result<Surreal<Client>> {
 
 pub async fn run_migrations(surreal: &Surreal<Client>) -> Result<()> {
     // Apply new migrations
-    MigrationRunner::new(&surreal).up().await.unwrap();
+    MigrationRunner::new(surreal).up().await.unwrap();
 
     // List applied migrations
-    let applied_migrations = MigrationRunner::new(&surreal).list().await.unwrap();
+    let applied_migrations = MigrationRunner::new(surreal).list().await.unwrap();
     tracing::info!("Applied migrations: {:?}", applied_migrations);
 
     Ok(())

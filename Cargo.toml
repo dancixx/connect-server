@@ -11,6 +11,7 @@ async-graphql = { version = "7.0.3", features = ["log"] }
 async-graphql-axum = "7.0.5"
 async-stream = "0.3.5"
 axum = { version = "0.7.5", default-features = true, features = ["ws"] }
+axum-auth = "0.7.0"
 chrono = { version = "0.4.37", features = ["serde"] }
 dotenvy = "0.15.7"
 firebase-auth = { version = "0.4.3", features = ["axum"] }

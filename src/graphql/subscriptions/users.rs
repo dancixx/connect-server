@@ -5,13 +5,6 @@ use tokio_stream::Stream;
 
 use crate::{graphql::types::surreal_id::SurrealID, models::users::User};
 
-fn handle(result: Result<Notification<User>>) -> Option<User> {
-    match result {
-        Ok(notification) => Some(notification.data),
-        Err(_) => None,
-    }
-}
-
 #[derive(Default)]
 pub struct UsersSubscriptionRoot;
 
@@ -32,7 +25,12 @@ impl UsersSubscriptionRoot {
             yield initial_data;
 
             for await result in stream {
-                yield handle(result);
+                let result: Result<Notification<User>> = result;
+
+                yield match result {
+                    Ok(notification) => Some(notification.data),
+                    Err(_) => None,
+                }
             }
         }
     }
