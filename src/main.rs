@@ -1,3 +1,4 @@
+mod enums;
 mod graphql;
 mod models;
 mod surreal;
@@ -36,7 +37,7 @@ async fn main() -> Result<()> {
     let _redis = redis::Client::open(env::var("REDIS_URL")?)?;
     let surreal = surreal::init().await?;
 
-    //surreal::run_migrations(&surreal).await?;
+    // surreal::run_migrations(&surreal).await?;
 
     tracing::info!("GraphiQL IDE: http://localhost:8080");
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;
@@ -56,7 +57,7 @@ async fn main() -> Result<()> {
         schema,
     };
     let app = Router::new()
-        .route("/", get(graphql::graphiql).post(graphql::http_handler))
+        .route("/", get(graphql::playground).post(graphql::http_handler))
         .route("/ws", get(graphql::ws_handler))
         .layer(
             CorsLayer::new()

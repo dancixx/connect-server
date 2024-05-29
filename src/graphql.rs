@@ -12,7 +12,6 @@ use async_graphql::{
 use async_graphql_axum::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
 use axum::{
     extract::{State, WebSocketUpgrade},
-    http::HeaderMap,
     response::{Html, IntoResponse, Response as AxumResponse},
 };
 use axum_auth::AuthBearer;
@@ -21,7 +20,7 @@ use serde::Deserialize;
 
 use crate::AppState;
 
-pub async fn graphiql() -> impl IntoResponse {
+pub async fn playground() -> impl IntoResponse {
     Html(
         GraphiQLSource::build()
             .endpoint("/")
@@ -36,16 +35,12 @@ pub async fn http_handler(
         schema,
     }): State<AppState>,
     AuthBearer(token): AuthBearer,
-    headers: HeaderMap,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    let admin_secret = headers.get("x-connect-admin-secret");
-    let _admin_secret = env::var("ADMIN_SECRET").unwrap();
+    let admin_secret = env::var("ADMIN_SECRET").unwrap();
 
-    if let Some(admin_secret) = admin_secret {
-        if admin_secret == &_admin_secret {
-            return schema.execute(req.into_inner()).await.into();
-        }
+    if token == admin_secret {
+        return schema.execute(req.into_inner()).await.into();
     }
 
     if token.is_empty() {
