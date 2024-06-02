@@ -1,5 +1,4 @@
 use async_graphql::{Context, FieldResult, Object};
-use serde_json::json;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{graphql::types::surreal_id::SurrealID, models::users};
@@ -36,8 +35,8 @@ impl UsersMutationRoot {
         let surreal = context.data::<Surreal<Client>>()?;
         let SurrealID(thing) = SurrealID::from(id);
         let user = surreal
-            .update::<Option<users::User>>(thing)
-            .merge(json!(_set))
+            .update::<Option<users::User>>(&thing)
+            .merge(_set)
             .await?;
 
         Ok(user.ok_or_else(|| "User not found")?)

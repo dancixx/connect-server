@@ -1,6 +1,7 @@
 use async_graphql::{InputObject, SimpleObject};
 
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::Datetime;
 
 use crate::{
     enums::Gender,

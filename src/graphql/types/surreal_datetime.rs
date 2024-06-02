@@ -1,8 +1,8 @@
 use async_graphql::scalar;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::Datetime;
 
 #[derive(Serialize, Deserialize, Default, Debug)]
-pub struct SurrealDateTime(Option<DateTime<Utc>>);
+pub struct SurrealDateTime(Option<Datetime>);
 
 scalar!(SurrealDateTime);
