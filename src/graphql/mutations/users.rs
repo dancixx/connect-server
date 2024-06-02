@@ -56,6 +56,7 @@ impl UsersMutationRoot {
             "UPDATE {id} SET current_location = {{type: 'Point', coordinates: {coordinates:?}}}",
         );
 
+        // TODO: change to update
         let response = surreal.query(query).await;
 
         if response.is_err() {

@@ -1184,6 +1184,7 @@ dependencies = [
  "dotenvy",
  "firebase-auth",
  "futures",
+ "geo-types",
  "itertools 0.13.0",
  "jsonwebtoken",
  "redis 0.25.2",

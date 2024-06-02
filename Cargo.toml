@@ -16,6 +16,7 @@ chrono = { version = "0.4.37", features = ["serde"] }
 dotenvy = "0.15.7"
 firebase-auth = { version = "0.4.3", features = ["axum"] }
 futures = "0.3.30"
+geo-types = "0.7.13"
 itertools = "0.13.0"
 jsonwebtoken = "9.3.0"
 redis = { version = "0.25.2", features = ["tokio-comp", "tokio-rustls-comp", "aio"] }

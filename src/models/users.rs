@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     enums::Gender,
-    graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID},
+    graphql::types::{
+        surreal_datetime::SurrealDateTime, surreal_id::SurrealID, surreal_point::SurrealPoint,
+    },
 };
 
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
@@ -27,8 +29,8 @@ pub struct User {
     pub weight: Option<i32>,
     pub bio: Option<String>,
     pub interests: Option<Vec<String>>,
-    // #[graphql(name = "current_location")]
-    // pub current_location: Option<[f64; 2]>,
+    #[graphql(name = "current_location")]
+    pub current_location: Option<SurrealPoint>,
     #[graphql(name = "max_distance")]
     pub max_distance: i32,
     #[graphql(name = "age_range")]
