@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use async_graphql::{Scalar, ScalarType};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
@@ -5,16 +7,18 @@ use surrealdb::sql::Thing;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SurrealID(pub Thing);
 
-impl Default for SurrealID {
-    fn default() -> Self {
-        Self(Thing::from(("", "")))
-    }
-}
-
 impl From<String> for SurrealID {
     fn from(id: String) -> Self {
         let id = id.split(':').collect::<Vec<&str>>();
         Self(Thing::from((id[0], id[1])))
+    }
+}
+
+impl Deref for SurrealID {
+    type Target = Thing;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 

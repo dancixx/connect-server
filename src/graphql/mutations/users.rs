@@ -22,7 +22,8 @@ impl UsersMutationRoot {
             .create::<Option<users::User>>(thing)
             .content(input)
             .await?;
-        Ok(user.into_iter().next().unwrap())
+
+        Ok(user.ok_or_else(|| "User not found")?)
     }
 
     #[graphql(name = "update_users_by_pk")]
@@ -38,7 +39,30 @@ impl UsersMutationRoot {
             .update::<Option<users::User>>(thing)
             .merge(json!(_set))
             .await?;
-        Ok(user.unwrap())
+
+        Ok(user.ok_or_else(|| "User not found")?)
+    }
+
+    #[graphql(name = "update_users_location_by_pk")]
+    async fn update_users_location_by_pk(
+        &self,
+        context: &Context<'_>,
+        id: String,
+        coordinates: [f64; 2],
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+
+        let query = format!(
+            "UPDATE {id} SET current_location = {{type: 'Point', coordinates: {coordinates:?}}}",
+        );
+
+        let response = surreal.query(query).await;
+
+        if response.is_err() {
+            return Err(response.unwrap_err().into());
+        }
+
+        Ok(String::from("Location updated"))
     }
 
     #[graphql(name = "delete_users_by_pk")]
@@ -50,6 +74,7 @@ impl UsersMutationRoot {
         let surreal = context.data::<Surreal<Client>>()?;
         let SurrealID(thing) = SurrealID::from(id);
         let user = surreal.delete::<Option<users::User>>(thing).await?;
-        Ok(user.unwrap())
+
+        Ok(user.ok_or_else(|| "User not found")?)
     }
 }

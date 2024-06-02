@@ -7,7 +7,7 @@ use crate::{
     graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID},
 };
 
-#[derive(SimpleObject, Serialize, Deserialize, Default, Debug)]
+#[derive(SimpleObject, Serialize, Deserialize, Debug)]
 pub struct User {
     pub id: SurrealID,
     pub email: String,
@@ -21,22 +21,21 @@ pub struct User {
     #[graphql(name = "age")]
     pub age: Option<i32>,
     pub gender: Option<Gender>,
-    #[graphql(name = "target_gender")]
-    pub target_gender: Option<Gender>,
-    pub metric: Option<String>,
+    pub preference: Option<Gender>,
+    pub metric: bool,
     pub height: Option<i32>,
     pub weight: Option<i32>,
     pub bio: Option<String>,
-    pub interest: Option<Vec<String>>,
-    pub country: Option<String>,
-    pub city: Option<String>,
+    pub interests: Option<Vec<String>>,
+    // #[graphql(name = "current_location")]
+    // pub current_location: Option<[f64; 2]>,
     #[graphql(name = "max_distance")]
     pub max_distance: i32,
     #[graphql(name = "age_range")]
     pub age_range: Option<Vec<i32>>,
     #[graphql(name = "max_match_count")]
     pub max_match_count: i32,
-    #[graphql(name = "max_message_count")]
+    #[graphql(name = "active_hours")]
     pub active_hours: Option<Vec<i32>>,
     #[graphql(name = "has_dog")]
     pub has_dog: bool,
@@ -54,6 +53,8 @@ pub struct User {
     pub need_house: bool,
     #[graphql(name = "open_for_travel_together")]
     pub open_for_travel_together: bool,
+    #[graphql(name = "is_registration_completed")]
+    pub is_registration_completed: bool,
     #[graphql(name = "is_paid_travel")]
     pub is_paid_travel: bool,
     #[graphql(name = "is_verified")]
@@ -73,47 +74,68 @@ pub struct InsertInput {
     pub username: Option<String>,
 }
 
-#[derive(InputObject, Serialize)]
+#[derive(InputObject, Serialize, Deserialize, Debug)]
 #[graphql(name = "users_update_set_input")]
 pub struct UpdateSetInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
     #[graphql(name = "last_name")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_name: Option<String>,
     #[graphql(name = "first_name")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub first_name: Option<String>,
     #[graphql(name = "birth_date")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub birth_date: Option<SurrealDateTime>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gender: Option<Gender>,
-    #[graphql(name = "target_gender")]
-    pub target_gender: Option<Gender>,
-    pub metric: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preference: Option<Gender>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metric: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub weight: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub interest: Option<Vec<String>>,
-    pub country: Option<String>,
-    pub city: Option<String>,
     #[graphql(name = "max_distance")]
-    pub max_distance: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_distance: Option<i32>,
     #[graphql(name = "age_range")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub age_range: Option<Vec<i32>>,
-    #[graphql(name = "max_message_count")]
+    #[graphql(name = "active_hours")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_hours: Option<Vec<i32>>,
     #[graphql(name = "has_dog")]
-    pub has_dog: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_dog: Option<bool>,
     #[graphql(name = "has_cat")]
-    pub has_cat: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_cat: Option<bool>,
     #[graphql(name = "has_car")]
-    pub has_car: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_car: Option<bool>,
     #[graphql(name = "has_house")]
-    pub has_house: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_house: Option<bool>,
     #[graphql(name = "need_pet")]
-    pub need_pet: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub need_pet: Option<bool>,
     #[graphql(name = "need_car")]
-    pub need_car: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub need_car: Option<bool>,
     #[graphql(name = "need_house")]
-    pub need_house: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub need_house: Option<bool>,
     #[graphql(name = "open_for_travel_together")]
-    pub open_for_travel_together: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub open_for_travel_together: Option<bool>,
     #[graphql(name = "is_paid_travel")]
-    pub is_paid_travel: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_paid_travel: Option<bool>,
 }
