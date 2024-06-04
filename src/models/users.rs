@@ -1,7 +1,6 @@
 use async_graphql::{InputObject, SimpleObject};
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::Datetime;
 
 use crate::{
     enums::Gender,
@@ -40,10 +39,8 @@ pub struct User {
     pub max_match_count: i32,
     #[graphql(name = "active_hours")]
     pub active_hours: Option<Vec<i32>>,
-    #[graphql(name = "has_dog")]
-    pub has_dog: bool,
-    #[graphql(name = "has_cat")]
-    pub has_cat: bool,
+    #[graphql(name = "has_pet")]
+    pub has_pet: bool,
     #[graphql(name = "has_car")]
     pub has_car: bool,
     #[graphql(name = "has_house")]
@@ -114,12 +111,9 @@ pub struct UpdateSetInput {
     #[graphql(name = "active_hours")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_hours: Option<Vec<i32>>,
-    #[graphql(name = "has_dog")]
+    #[graphql(name = "has_pet")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub has_dog: Option<bool>,
-    #[graphql(name = "has_cat")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub has_cat: Option<bool>,
+    pub has_pet: Option<bool>,
     #[graphql(name = "has_car")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub has_car: Option<bool>,
