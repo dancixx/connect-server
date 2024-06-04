@@ -51,11 +51,24 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<Surreal<Client>>()?;
 
+        // TODO: this is not working
+        // let SurrealID(thing) = SurrealID::from(id);
+        // let current_location = Point::new(coordinates[0], coordinates[1]);
+
+        // #[derive(Serialize)]
+        // struct SurrealPoint {
+        //     pub current_location: Point,
+        // }
+
+        // let user = surreal
+        //     .update::<Option<users::User>>(thing)
+        //     .merge(SurrealPoint { current_location })
+        //     .await?;
+
         let query = format!(
             "UPDATE {id} SET current_location = {{type: 'Point', coordinates: {coordinates:?}}}",
         );
 
-        // TODO: change to update
         let response = surreal.query(query).await;
 
         if response.is_err() {
