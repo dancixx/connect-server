@@ -5,4 +5,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SurrealPoint(pub Point);
 
-scalar!(SurrealPoint);
+scalar!(
+    SurrealPoint,
+    "SurrealPoint",
+    "This is a scalar type for a point in a 2D plane."
+);

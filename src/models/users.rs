@@ -1,6 +1,7 @@
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 
 use serde::{Deserialize, Serialize};
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     enums::Gender,
@@ -9,7 +10,10 @@ use crate::{
     },
 };
 
+use super::{goals::GoalRelation, interests::InterestRelation};
+
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
+#[graphql(complex)]
 pub struct User {
     pub id: SurrealID,
     pub email: String,
@@ -20,15 +24,13 @@ pub struct User {
     pub first_name: Option<String>,
     #[graphql(name = "birth_date")]
     pub birth_date: Option<SurrealDateTime>,
-    #[graphql(name = "age")]
     pub age: Option<i32>,
     pub gender: Option<Gender>,
     pub preference: Option<Gender>,
     pub metric: bool,
-    pub height: Option<i32>,
-    pub weight: Option<i32>,
+    pub height: Option<f32>,
+    pub weight: Option<f32>,
     pub bio: Option<String>,
-    pub interests: Option<Vec<String>>,
     #[graphql(name = "current_location")]
     pub current_location: Option<SurrealPoint>,
     #[graphql(name = "max_distance")]
@@ -67,6 +69,52 @@ pub struct User {
     pub updated_at: SurrealDateTime,
 }
 
+#[ComplexObject]
+impl User {
+    pub async fn interests(
+        &self,
+        context: &Context<'_>,
+    ) -> FieldResult<Option<Vec<InterestRelation>>> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let response = surreal
+            .query("SELECT * FROM interests WHERE in = ($in)")
+            .bind(("in", self.id.clone()))
+            .await;
+
+        if let Err(e) = response {
+            return Err(e.into());
+        }
+
+        let interests: Option<Vec<InterestRelation>> = response?.take(0)?;
+
+        if let Some(interests) = interests {
+            return Ok(Some(interests));
+        }
+        Ok(None)
+    }
+
+    pub async fn goal(&self, context: &Context<'_>) -> FieldResult<Option<GoalRelation>> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let response = surreal
+            .query("SELECT * FROM goals WHERE in = ($in)")
+            .bind(("in", self.id.clone()))
+            .await;
+
+        if let Err(e) = response {
+            return Err(e.into());
+        }
+
+        let goal: Option<Vec<GoalRelation>> = response?.take(0)?;
+
+        if let Some(goal) = goal {
+            let goal = goal.into_iter().next();
+            return Ok(goal);
+        }
+
+        Ok(None)
+    }
+}
+
 #[derive(InputObject, Serialize)]
 #[graphql(name = "users_insert_input")]
 pub struct InsertInput {
@@ -89,19 +137,19 @@ pub struct UpdateSetInput {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub birth_date: Option<SurrealDateTime>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub age: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gender: Option<Gender>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preference: Option<Gender>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metric: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub height: Option<i32>,
+    pub height: Option<f32>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub weight: Option<i32>,
+    pub weight: Option<f32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bio: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub interest: Option<Vec<String>>,
     #[graphql(name = "max_distance")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_distance: Option<i32>,
@@ -135,4 +183,7 @@ pub struct UpdateSetInput {
     #[graphql(name = "is_paid_travel")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_paid_travel: Option<bool>,
+    #[graphql(name = "is_registration_completed")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_registration_completed: Option<bool>,
 }

@@ -7,6 +7,7 @@ use std::env;
 
 use anyhow::Result;
 use async_graphql::{extensions::Logger, Schema};
+use async_openai::Client;
 use axum::{http::Method, routing::get, Router};
 use firebase_auth::FirebaseAuth;
 use graphql::{mutations::MutationRoot, queries::QueryRoot, subscriptions::SubscriptionRoot};
@@ -35,6 +36,7 @@ async fn main() -> Result<()> {
         .init();
 
     let _redis = redis::Client::open(env::var("REDIS_URL")?)?;
+    let openai = Client::new();
     let surreal = surreal::init().await?;
 
     surreal::run_migrations(&surreal).await?;
@@ -48,6 +50,7 @@ async fn main() -> Result<()> {
     )
     .data(_redis)
     .data(surreal)
+    .data(openai)
     .data(firebase_auth.clone())
     .extension(Logger)
     .finish();

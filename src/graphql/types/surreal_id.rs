@@ -1,6 +1,6 @@
-use std::ops::Deref;
+use std::{borrow::Cow, ops::Deref};
 
-use async_graphql::{Scalar, ScalarType};
+use async_graphql::{Scalar, ScalarType, TypeName};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -22,7 +22,13 @@ impl Deref for SurrealID {
     }
 }
 
-#[Scalar]
+impl TypeName for SurrealID {
+    fn type_name() -> Cow<'static, str> {
+        Cow::Borrowed("String")
+    }
+}
+
+#[Scalar(name = "SurrealID", name_type = true)]
 impl ScalarType for SurrealID {
     fn parse(value: async_graphql::Value) -> async_graphql::InputValueResult<Self> {
         if let async_graphql::Value::String(value) = value {
