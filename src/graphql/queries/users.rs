@@ -9,9 +9,26 @@ pub struct UsersQueryRoot;
 #[Object]
 impl UsersQueryRoot {
     #[graphql(name = "select_users")]
-    async fn select_users(&self, context: &Context<'_>) -> FieldResult<Vec<users::User>> {
+    async fn select_users(
+        &self,
+        context: &Context<'_>,
+        limit: Option<usize>,
+        offset: Option<usize>,
+    ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
-        let users = surreal.select::<Vec<users::User>>("users").await?;
+        let query = surreal
+            .query("SELECT * FROM users LIMIT ($limit) START ($offset);")
+            .bind(("limit", limit.unwrap_or(100)))
+            .bind(("offset", offset.unwrap_or(0)))
+            .await;
+
+        if let Err(e) = query {
+            tracing::error!("Error: {:?}", e);
+            return Err(e.into());
+        }
+
+        let users = query?.take::<Vec<users::User>>(0)?;
+
         Ok(users)
     }
 

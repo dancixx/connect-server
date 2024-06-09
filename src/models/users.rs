@@ -1,7 +1,6 @@
-use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
+use async_graphql::{InputObject, SimpleObject};
 
 use serde::{Deserialize, Serialize};
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     enums::Gender,
@@ -10,10 +9,7 @@ use crate::{
     },
 };
 
-use super::{goals::GoalRelation, interests::InterestRelation};
-
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
-#[graphql(complex)]
 pub struct User {
     pub id: SurrealID,
     pub email: String,
@@ -27,6 +23,8 @@ pub struct User {
     pub age: Option<i32>,
     pub gender: Option<Gender>,
     pub preference: Option<Gender>,
+    pub goal: Option<String>,
+    pub interests: Option<Vec<String>>,
     pub metric: bool,
     pub height: Option<f32>,
     pub weight: Option<f32>,
@@ -69,52 +67,6 @@ pub struct User {
     pub updated_at: SurrealDateTime,
 }
 
-#[ComplexObject]
-impl User {
-    pub async fn interests(
-        &self,
-        context: &Context<'_>,
-    ) -> FieldResult<Option<Vec<InterestRelation>>> {
-        let surreal = context.data::<Surreal<Client>>()?;
-        let response = surreal
-            .query("SELECT * FROM interests WHERE in = ($in)")
-            .bind(("in", self.id.clone()))
-            .await;
-
-        if let Err(e) = response {
-            return Err(e.into());
-        }
-
-        let interests: Option<Vec<InterestRelation>> = response?.take(0)?;
-
-        if let Some(interests) = interests {
-            return Ok(Some(interests));
-        }
-        Ok(None)
-    }
-
-    pub async fn goal(&self, context: &Context<'_>) -> FieldResult<Option<GoalRelation>> {
-        let surreal = context.data::<Surreal<Client>>()?;
-        let response = surreal
-            .query("SELECT * FROM goals WHERE in = ($in)")
-            .bind(("in", self.id.clone()))
-            .await;
-
-        if let Err(e) = response {
-            return Err(e.into());
-        }
-
-        let goal: Option<Vec<GoalRelation>> = response?.take(0)?;
-
-        if let Some(goal) = goal {
-            let goal = goal.into_iter().next();
-            return Ok(goal);
-        }
-
-        Ok(None)
-    }
-}
-
 #[derive(InputObject, Serialize)]
 #[graphql(name = "users_insert_input")]
 pub struct InsertInput {
@@ -142,6 +94,10 @@ pub struct UpdateSetInput {
     pub gender: Option<Gender>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preference: Option<Gender>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub goal: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub interests: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub metric: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
