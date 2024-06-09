@@ -12,15 +12,18 @@ impl UsersQueryRoot {
     async fn select_users(
         &self,
         context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
         limit: Option<usize>,
         offset: Option<usize>,
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
-        let query = surreal
-            .query("SELECT * FROM users LIMIT ($limit) START ($offset);")
-            .bind(("limit", limit.unwrap_or(100)))
-            .bind(("offset", offset.unwrap_or(0)))
-            .await;
+        let query = format!(
+            "SELECT * FROM users WHERE id IS NOT {} LIMIT {} START {};",
+            user_id,
+            limit.unwrap_or(20),
+            offset.unwrap_or(0)
+        );
+        let query = surreal.query(query).await;
 
         if let Err(e) = query {
             tracing::error!("Error: {:?}", e);

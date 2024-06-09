@@ -91,4 +91,55 @@ impl UsersMutationRoot {
 
         Ok(user.ok_or("User not found")?)
     }
+
+    #[graphql(name = "swipe_users_right_by_pk")]
+    async fn swipe_users_right_by_pk(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+        #[graphql(name = "target_user_id")] target_user_id: String,
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let relate = format!(
+            "RELATE {user_id}->users_relations->{user_target_id} SET in_swipe = true",
+            user_id = user_id,
+            user_target_id = target_user_id
+        );
+        surreal.query(relate).await?;
+        Ok(String::from("User swiped right"))
+    }
+
+    #[graphql(name = "swipe_users_left_by_pk")]
+    async fn swipe_users_left_by_pk(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+        #[graphql(name = "target_user_id")] target_user_id: String,
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let relate = format!(
+            "RELATE {user_id}->users_relations->{target_user_id} SET in_swipe = false",
+            user_id = user_id,
+            target_user_id = target_user_id
+        );
+        surreal.query(relate).await?;
+        Ok(String::from("User swiped left"))
+    }
+
+    #[graphql(name = "swipe_users_up_by_pk")]
+    async fn swipe_users_up_by_pk(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+        #[graphql(name = "target_user_id")] target_user_id: String,
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let relate = format!(
+            "RELATE {user_id}->users_relations->{user_target_id} SET in_swipe = true, is_super_swipe = true",
+            user_id = user_id,
+            user_target_id = target_user_id
+        );
+        surreal.query(relate).await?;
+        Ok(String::from("User swiped up"))
+    }
 }
