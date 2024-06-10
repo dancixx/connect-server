@@ -46,4 +46,27 @@ impl UsersQueryRoot {
         let user = surreal.select::<Option<users::User>>(thing).await?;
         Ok(user)
     }
+
+    #[graphql(name = "select_swiped_users")]
+    async fn select_swiped_users(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+    ) -> FieldResult<Vec<users::User>> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let query = format!(
+            "SELECT * FROM users WHERE id INSIDE array::first((SELECT ->(users_relations WHERE in_swipe = true)->users AS users FROM {})).users;;",
+            user_id
+        );
+        let query = surreal.query(query).await;
+
+        if let Err(e) = query {
+            tracing::error!("Error: {:?}", e);
+            return Err(e.into());
+        }
+
+        let users = query?.take::<Vec<users::User>>(0)?;
+
+        Ok(users)
+    }
 }
