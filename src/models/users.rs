@@ -1,6 +1,7 @@
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::{ComplexObject, Context, FieldResult, InputObject, SimpleObject};
 
 use serde::{Deserialize, Serialize};
+use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{
     enums::Gender,
@@ -9,7 +10,10 @@ use crate::{
     },
 };
 
+use super::i18n::I18n;
+
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
+#[graphql(complex)]
 pub struct User {
     pub id: SurrealID,
     pub email: String,
@@ -23,8 +27,10 @@ pub struct User {
     pub age: Option<i32>,
     pub gender: Option<Gender>,
     pub preference: Option<Gender>,
-    pub goal: Option<String>,
-    pub interests: Option<Vec<String>>,
+    #[graphql(skip)]
+    goal: Option<String>,
+    #[graphql(skip)]
+    interests: Option<Vec<String>>,
     pub metric: bool,
     pub height: Option<f32>,
     pub weight: Option<f32>,
@@ -65,6 +71,43 @@ pub struct User {
     pub created_at: SurrealDateTime,
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
+}
+
+#[ComplexObject]
+impl User {
+    #[graphql(name = "goal")]
+    async fn goal_details(&self, context: &Context<'_>) -> FieldResult<Option<I18n>> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let goal = self.goal.clone();
+
+        if self.goal.is_none() {
+            return Ok(None);
+        }
+
+        let SurrealID(thing) = SurrealID::from(goal.unwrap());
+        let goal = surreal.select::<Option<I18n>>(thing).await?;
+
+        Ok(goal)
+    }
+
+    #[graphql(name = "interests")]
+    async fn interests_details(&self, context: &Context<'_>) -> FieldResult<Vec<I18n>> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let interests = self.interests.clone();
+
+        if self.interests.is_none() {
+            return Ok(vec![]);
+        }
+
+        let interests = interests.unwrap();
+        let query = format!("SELECT * FROM interests WHERE id ∈ {:?};", interests);
+
+        let query = surreal.query(query).await;
+
+        let interests = query?.take::<Vec<I18n>>(0)?;
+
+        Ok(interests)
+    }
 }
 
 #[derive(InputObject, Serialize)]

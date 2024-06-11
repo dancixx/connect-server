@@ -13,8 +13,6 @@ impl TypeName for SurrealDateTime {
     }
 }
 
-// scalar!(SurrealDateTime);
-
 #[Scalar(name = "SurrealDateTime", name_type = true)]
 impl ScalarType for SurrealDateTime {
     fn parse(value: async_graphql::Value) -> async_graphql::InputValueResult<Self> {
