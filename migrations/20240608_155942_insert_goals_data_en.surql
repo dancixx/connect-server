@@ -1,4 +1,4 @@
-INSERT INTO goals (en)
+INSERT INTO goal (en)
     VALUES        
         ("Serious relationship"),
         ("Sexual relationship"),

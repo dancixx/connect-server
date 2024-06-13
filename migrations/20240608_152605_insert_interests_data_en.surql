@@ -1,4 +1,4 @@
-INSERT INTO interests (en) 
+INSERT INTO interest (en) 
     VALUES 
         ('Travel'), 
         ('Outdoors'), 

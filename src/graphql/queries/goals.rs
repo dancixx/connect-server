@@ -11,7 +11,7 @@ impl GoalsQueryRoot {
     #[graphql(name = "select_goals")]
     async fn select_goals(&self, context: &Context<'_>) -> FieldResult<Vec<Goal>> {
         let surreal = context.data::<Surreal<Client>>()?;
-        let goals = surreal.select::<Vec<Goal>>("goals").await.unwrap();
+        let goals = surreal.select::<Vec<Goal>>("goal").await.unwrap();
         Ok(goals)
     }
 }

@@ -52,20 +52,6 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<Surreal<Client>>()?;
 
-        // TODO: this is not working
-        // let SurrealID(thing) = SurrealID::from(id);
-        // let current_location = Point::new(coordinates[0], coordinates[1]);
-
-        // #[derive(Serialize)]
-        // struct SurrealPoint {
-        //     pub current_location: Point,
-        // }
-
-        // let user = surreal
-        //     .update::<Option<users::User>>(thing)
-        //     .merge(SurrealPoint { current_location })
-        //     .await?;
-
         let query = format!(
             "UPDATE {id} SET current_location = {{type: 'Point', coordinates: {coordinates:?}}}",
         );
@@ -101,7 +87,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<Surreal<Client>>()?;
         let relate = format!(
-            "RELATE {user_id}->users_relations->{user_target_id} SET in_swipe = true",
+            "RELATE {user_id}->user_edge->{user_target_id} SET in_swipe = true",
             user_id = user_id,
             user_target_id = target_user_id
         );
@@ -118,7 +104,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<Surreal<Client>>()?;
         let relate = format!(
-            "RELATE {user_id}->users_relations->{target_user_id} SET in_swipe = false",
+            "RELATE {user_id}->user_edge->{target_user_id} SET in_swipe = false",
             user_id = user_id,
             target_user_id = target_user_id
         );
@@ -135,7 +121,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<Surreal<Client>>()?;
         let relate = format!(
-            "RELATE {user_id}->users_relations->{user_target_id} SET in_swipe = true, is_super_swipe = true",
+            "RELATE {user_id}->user_edge->{user_target_id} SET in_swipe = true, is_super_swipe = true",
             user_id = user_id,
             user_target_id = target_user_id
         );
