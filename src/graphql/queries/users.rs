@@ -18,9 +18,10 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
-            "SELECT * FROM user WHERE 
-            (id ∉ (array::first((SELECT ->(user_edge WHERE in_swipe = true)->user AS users FROM {0})).users) && (id != {0}))
-            LIMIT {1} START {2};",
+            "
+                LET $swiped = (array::first((SELECT ->(user_edge WHERE in_swipe = true)->user AS users FROM {0})).users);
+                SELECT * FROM user WHERE (id ∉ $swiped && (id != {0})) LIMIT {1} START {2};
+            ",
             user_id, limit, offset
         );
         let query = surreal.query(query).await;
@@ -30,7 +31,7 @@ impl UsersQueryRoot {
             return Err(e.into());
         }
 
-        let users = query?.take::<Vec<users::User>>(0)?;
+        let users = query?.take::<Vec<users::User>>(1)?;
 
         Ok(users)
     }
