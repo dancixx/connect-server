@@ -18,6 +18,9 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
+            // This query has two parts:
+            // 1. Get the users that the current user has swiped on
+            // 2. Get the users that the current user has not swiped on
             "
                 LET $swiped = (array::first((SELECT ->(user_edge WHERE in_swipe = true)->user AS users FROM {0})).users);
                 SELECT * FROM user WHERE (id ∉ $swiped && (id != {0})) LIMIT {1} START {2};
@@ -31,6 +34,7 @@ impl UsersQueryRoot {
             return Err(e.into());
         }
 
+        // This query has two parts and this is the reason why we are using take::<Vec<users::User>>(1)
         let users = query?.take::<Vec<users::User>>(1)?;
 
         Ok(users)
