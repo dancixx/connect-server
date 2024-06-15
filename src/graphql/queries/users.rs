@@ -60,7 +60,7 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
-            "array::first(SELECT ->(user_edge WHERE in_swipe = true)->user.* AS users FROM {}).users;",
+            "array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe != false)->user.* AS users FROM {}).users;",
             user_id
         );
         let query = surreal.query(query).await;
@@ -83,7 +83,7 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
-            "array::first(SELECT <-(user_edge WHERE in_swipe = true)<-user.* AS users FROM {}).users;",
+            "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe = false)<-user.* AS users FROM {}).users;",
             user_id
         );
         let query = surreal.query(query).await;
@@ -94,6 +94,34 @@ impl UsersQueryRoot {
         }
 
         let users = query?.take::<Vec<users::User>>(0)?;
+
+        Ok(users)
+    }
+
+    #[graphql(name = "select_users_matches")]
+    async fn select_users_matches(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+    ) -> FieldResult<Vec<users::User>> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        // TODO: improve this query
+        let query = format!(
+            "
+            LET $in_swipes = array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe = true)->user.* AS users FROM {0}).users;
+            LET $out_swipes = array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe = true)<-user.* AS users FROM {0}).users;
+            RETURN array::concat($in_swipes, $out_swipes);
+            ",
+            user_id
+        );
+        let query = surreal.query(query).await;
+
+        if let Err(e) = query {
+            tracing::error!("Error: {:?}", e);
+            return Err(e.into());
+        }
+
+        let users = query?.take::<Vec<users::User>>(2)?;
 
         Ok(users)
     }

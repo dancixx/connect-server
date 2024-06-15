@@ -128,4 +128,21 @@ impl UsersMutationRoot {
         surreal.query(relate).await?;
         Ok(String::from("User swiped up"))
     }
+
+    #[graphql(name = "match_users_by_pk")]
+    async fn match_users_by_pk(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+        #[graphql(name = "target_user_id")] target_user_id: String,
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let query = format!(
+            "UPDATE user_edge MERGE {{ out_swipe: true }} WHERE in = {user_id} AND out = {target_user_id}",
+            user_id = user_id,
+            target_user_id = target_user_id
+        );
+        surreal.query(query).await?;
+        Ok(String::from("Users matched"))
+    }
 }
