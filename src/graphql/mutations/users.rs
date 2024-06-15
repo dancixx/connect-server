@@ -129,8 +129,8 @@ impl UsersMutationRoot {
         Ok(String::from("User swiped up"))
     }
 
-    #[graphql(name = "match_users_by_pk")]
-    async fn match_users_by_pk(
+    #[graphql(name = "match_users")]
+    async fn match_users(
         &self,
         context: &Context<'_>,
         #[graphql(name = "user_id")] user_id: String,
@@ -144,5 +144,22 @@ impl UsersMutationRoot {
         );
         surreal.query(query).await?;
         Ok(String::from("Users matched"))
+    }
+
+    #[graphql(name = "revert_users_swipe")]
+    async fn revert_users_swipe(
+        &self,
+        context: &Context<'_>,
+        #[graphql(name = "user_id")] user_id: String,
+        #[graphql(name = "target_user_id")] target_user_id: String,
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let query = format!(
+            "DELETE user_edge WHERE in = {user_id} AND out = {target_user_id}",
+            user_id = user_id,
+            target_user_id = target_user_id
+        );
+        surreal.query(query).await?;
+        Ok(String::from("Swipe reverted"))
     }
 }
