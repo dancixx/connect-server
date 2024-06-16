@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
     let openai = Client::new();
     let surreal = surreal::init().await?;
 
-    surreal::run_migrations(&surreal).await?;
+    //surreal::run_migrations(&surreal).await?;
 
     tracing::info!("GraphiQL IDE: http://localhost:8080");
     let firebase_auth = FirebaseAuth::new(&std::env::var("FIREBASE_PROJECT_ID")?).await;

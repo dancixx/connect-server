@@ -83,7 +83,7 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
-            "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe = false)<-user.* AS users FROM {}).users;",
+            "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe != false)<-user.* AS users FROM {}).users;",
             user_id
         );
         let query = surreal.query(query).await;
@@ -125,4 +125,11 @@ impl UsersQueryRoot {
 
         Ok(users)
     }
+
+    // #[graphql(name = "select_messages")]
+    // async fn select_messages(&self, context: &Context<'_>) -> FieldResult<Vec<users::Chat>> {
+    //     let surreal = context.data::<Surreal<Client>>()?;
+    //     let messages = surreal.select::<Vec<users::Chat>>("chat_message").await?;
+    //     Ok(messages)
+    // }
 }

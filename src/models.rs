@@ -1,3 +1,4 @@
+pub mod chat;
 pub mod goals;
 pub mod i18n;
 pub mod interests;
