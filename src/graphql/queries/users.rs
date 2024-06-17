@@ -125,11 +125,4 @@ impl UsersQueryRoot {
 
         Ok(users)
     }
-
-    // #[graphql(name = "select_messages")]
-    // async fn select_messages(&self, context: &Context<'_>) -> FieldResult<Vec<users::Chat>> {
-    //     let surreal = context.data::<Surreal<Client>>()?;
-    //     let messages = surreal.select::<Vec<users::Chat>>("chat_message").await?;
-    //     Ok(messages)
-    // }
 }

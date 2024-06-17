@@ -18,7 +18,6 @@ DEFINE FIELD current_location ON user TYPE option<point> PERMISSIONS FULL;
 DEFINE FIELD max_distance ON user TYPE number DEFAULT 25 PERMISSIONS FULL;
 DEFINE FIELD age_range ON user TYPE option<array<number>> PERMISSIONS FULL;
 DEFINE FIELD max_match_count ON user TYPE number DEFAULT 10 PERMISSIONS FULL;
-DEFINE FIELD active_hours ON user TYPE option<array<number>> PERMISSIONS FULL;
 DEFINE FIELD has_pet ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD has_car ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD has_house ON user TYPE bool DEFAULT false PERMISSIONS FULL;
