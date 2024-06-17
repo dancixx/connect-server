@@ -1,4 +1,4 @@
-use async_graphql::SimpleObject;
+use async_graphql::{InputObject, SimpleObject};
 use serde::{Deserialize, Serialize};
 
 use crate::graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID};
@@ -18,4 +18,11 @@ pub struct Chat {
     pub read_at: Option<SurrealDateTime>,
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
+    pub user: Option<super::users::User>,
+}
+
+#[derive(InputObject, Serialize, Deserialize, Debug)]
+#[graphql(name = "chats_update_set_input")]
+pub struct UpdateSetInput {
+    message: String,
 }

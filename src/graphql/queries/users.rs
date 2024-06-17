@@ -60,19 +60,17 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
-            "array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe != false)->user.* AS users FROM {}).users;",
+            "array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe != true)->user.* AS users FROM {}).users;",
             user_id
         );
-        let query = surreal.query(query).await;
 
+        let query = surreal.query(query).await;
         if let Err(e) = query {
             tracing::error!("Error: {:?}", e);
             return Err(e.into());
         }
 
-        let users = query?.take::<Vec<users::User>>(0)?;
-
-        Ok(users)
+        Ok(query?.take::<Vec<users::User>>(0)?)
     }
 
     #[graphql(name = "select_users_swiper")]
@@ -83,19 +81,17 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let query = format!(
-            "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe != false)<-user.* AS users FROM {}).users;",
+            "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe != true)<-user.* AS users FROM {}).users;",
             user_id
         );
-        let query = surreal.query(query).await;
 
+        let query = surreal.query(query).await;
         if let Err(e) = query {
             tracing::error!("Error: {:?}", e);
             return Err(e.into());
         }
 
-        let users = query?.take::<Vec<users::User>>(0)?;
-
-        Ok(users)
+        Ok(query?.take::<Vec<users::User>>(0)?)
     }
 
     #[graphql(name = "select_users_matches")]
@@ -114,15 +110,13 @@ impl UsersQueryRoot {
             ",
             user_id
         );
-        let query = surreal.query(query).await;
 
+        let query = surreal.query(query).await;
         if let Err(e) = query {
             tracing::error!("Error: {:?}", e);
             return Err(e.into());
         }
 
-        let users = query?.take::<Vec<users::User>>(2)?;
-
-        Ok(users)
+        Ok(query?.take::<Vec<users::User>>(2)?)
     }
 }

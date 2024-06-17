@@ -57,7 +57,6 @@ impl UsersMutationRoot {
         );
 
         let response = surreal.query(query).await;
-
         if let Err(e) = response {
             return Err(e.into());
         }
@@ -70,12 +69,12 @@ impl UsersMutationRoot {
         &self,
         context: &Context<'_>,
         id: String,
-    ) -> FieldResult<users::User> {
+    ) -> FieldResult<String> {
         let surreal = context.data::<Surreal<Client>>()?;
         let SurrealID(thing) = SurrealID::from(id);
-        let user = surreal.delete::<Option<users::User>>(thing).await?;
+        surreal.delete::<Option<users::User>>(thing).await?;
 
-        Ok(user.ok_or("User not found")?)
+        Ok(String::from("User deleted"))
     }
 
     #[graphql(name = "swipe_users_right_by_pk")]
@@ -92,6 +91,7 @@ impl UsersMutationRoot {
             user_target_id = target_user_id
         );
         surreal.query(relate).await?;
+
         Ok(String::from("User swiped right"))
     }
 
@@ -109,6 +109,7 @@ impl UsersMutationRoot {
             target_user_id = target_user_id
         );
         surreal.query(relate).await?;
+
         Ok(String::from("User swiped left"))
     }
 
@@ -126,6 +127,7 @@ impl UsersMutationRoot {
             user_target_id = target_user_id
         );
         surreal.query(relate).await?;
+
         Ok(String::from("User swiped up"))
     }
 
@@ -143,6 +145,7 @@ impl UsersMutationRoot {
             target_user_id = target_user_id
         );
         surreal.query(query).await?;
+
         Ok(String::from("Users matched"))
     }
 
@@ -160,6 +163,7 @@ impl UsersMutationRoot {
             target_user_id = target_user_id
         );
         surreal.query(query).await?;
+
         Ok(String::from("Swipe reverted"))
     }
 }
