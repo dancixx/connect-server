@@ -102,11 +102,11 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<Surreal<Client>>()?;
         // TODO: improve this query
+        // TODO: order by created_at
         let query = format!(
             "
-            LET $in_swipes = array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe = true)->user.* AS users FROM {0}).users;
-            LET $out_swipes = array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe = true)<-user.* AS users FROM {0}).users;
-            RETURN array::concat($in_swipes, $out_swipes);
+            LET $id = {0};
+            RETURN $id->(user_edge WHERE in_swipe = true && out_swipe = true)->user.* || $id<-(user_edge WHERE in_swipe = true && out_swipe = true)<-user.*
             ",
             user_id
         );
@@ -117,6 +117,6 @@ impl UsersQueryRoot {
             return Err(e.into());
         }
 
-        Ok(query?.take::<Vec<users::User>>(2)?)
+        Ok(query?.take::<Vec<users::User>>(1)?)
     }
 }
