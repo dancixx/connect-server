@@ -19,7 +19,7 @@ impl ChatsQueryRoot {
         // TODO: add pagination
         let query = format!(
             "
-            LET $chat_id = SELECT id FROM user_edge WHERE in = {user_id} && out = {target_user_id};
+            LET $chat_id = SELECT id FROM user_edge WHERE (in = {user_id} && out = {target_user_id}) || (in = {target_user_id} && out = {user_id});
             LET $chat_id = array::first($chat_id);
             SELECT *, array::first(->chat_message_user_edge->user.*) as user FROM $chat_id->chat_edge->chat_message.* ORDER BY created_at DESC;
             ",

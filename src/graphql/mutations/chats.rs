@@ -21,9 +21,9 @@ impl ChatsMutationRoot {
             r#"
             LET $in = {user_id};
             LET $out = {target_user_id};
-            LET $chat_id = SELECT id FROM user_edge WHERE in = {user_id} && out = {target_user_id};
+            LET $chat_id = SELECT id FROM user_edge WHERE (in = {user_id} && out = {target_user_id}) || (in = {target_user_id} && out = {user_id});
             LET $message_id = (RELATE $chat_id->chat_edge->(INSERT INTO chat_message {{message: "{message}"}})).out;
-            RELATE $message_id->chat_user_message_edge->$in;
+            RELATE $message_id->chat_message_user_edge->$in;
             "#,
             user_id = user_id,
             target_user_id = target_user_id,
