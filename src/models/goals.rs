@@ -4,12 +4,6 @@ use serde::{Deserialize, Serialize};
 use crate::graphql::types::surreal_id::SurrealID;
 
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
-pub struct Goal {
-    pub id: SurrealID,
-    pub en: String,
-}
-
-#[derive(SimpleObject, Serialize, Deserialize, Debug)]
 pub struct GoalRelation {
     pub id: SurrealID,
     pub r#in: String,

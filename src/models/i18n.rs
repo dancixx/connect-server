@@ -7,4 +7,11 @@ use crate::graphql::types::surreal_id::SurrealID;
 pub struct I18n {
     pub id: SurrealID,
     pub en: String,
+    pub de: String,
+    pub es: String,
+    pub fr: String,
+    pub it: String,
+    pub ja: String,
+    pub zh: String,
+    pub hu: String,
 }
