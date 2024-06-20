@@ -1,4 +1,5 @@
 use async_graphql::{Context, FieldResult, Object};
+use serde_json::json;
 use surrealdb::{engine::remote::ws::Client, Surreal};
 
 use crate::{graphql::types::surreal_id::SurrealID, models::chats};
@@ -68,5 +69,21 @@ impl ChatsMutationRoot {
         surreal.delete::<Option<chats::Chat>>(thing).await?;
 
         Ok(String::from("Chat message deleted"))
+    }
+
+    #[graphql(name = "update_chat_message_many")]
+    async fn update_chat_message_many(
+        &self,
+        context: &Context<'_>,
+        ids: Vec<String>,
+        #[graphql(name = "_set")] _set: chats::UpdateSetInput,
+    ) -> FieldResult<String> {
+        let surreal = context.data::<Surreal<Client>>()?;
+        let query = format!(
+            "UPDATE chat_message MERGE {_set} WHERE id IN {ids:?};",
+            _set = json!(_set),
+        );
+        surreal.query(query).await?;
+        Ok(String::from("Chat messages updated"))
     }
 }

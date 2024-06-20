@@ -106,7 +106,13 @@ impl UsersQueryRoot {
         let query = format!(
             "
             LET $id = {0};
-            RETURN $id->(user_edge WHERE in_swipe = true && out_swipe = true)->user.* || $id<-(user_edge WHERE in_swipe = true && out_swipe = true)<-user.*
+            SELECT *, 
+            (
+                SELECT * FROM <-chat_message_user_edge<-chat_message ORDER BY created_at DESC LIMIT 1
+            )[0] as last_message
+            FROM 
+            $id->(user_edge WHERE in_swipe = true && out_swipe = true)->user.* || 
+            $id<-(user_edge WHERE in_swipe = true && out_swipe = true)<-user.*
             ",
             user_id
         );

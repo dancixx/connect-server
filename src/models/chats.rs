@@ -18,11 +18,23 @@ pub struct Chat {
     pub read_at: Option<SurrealDateTime>,
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
-    pub user: Option<super::users::User>,
+    pub user: Option<Box<super::users::User>>,
 }
 
 #[derive(InputObject, Serialize, Deserialize, Debug)]
 #[graphql(name = "chats_update_set_input")]
 pub struct UpdateSetInput {
-    message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    message: Option<String>,
+    #[graphql(name = "is_deleted")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    is_deleted: Option<bool>,
+    #[graphql(name = "is_read")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    is_read: Option<bool>,
+    #[graphql(name = "read_at")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    read_at: Option<SurrealDateTime>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    reaction: Option<String>,
 }

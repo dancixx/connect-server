@@ -10,8 +10,6 @@ use crate::{
     },
 };
 
-use super::i18n::I18n;
-
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
 #[graphql(complex)]
 pub struct User {
@@ -71,12 +69,14 @@ pub struct User {
     pub created_at: SurrealDateTime,
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
+    #[graphql(name = "last_message")]
+    pub last_message: Option<super::chats::Chat>,
 }
 
 #[ComplexObject]
 impl User {
     #[graphql(name = "goal")]
-    async fn goal_details(&self, context: &Context<'_>) -> FieldResult<Option<I18n>> {
+    async fn goal_details(&self, context: &Context<'_>) -> FieldResult<Option<super::i18n::I18n>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let goal = self.goal.clone();
 
@@ -85,13 +85,16 @@ impl User {
         }
 
         let SurrealID(thing) = SurrealID::from(goal.unwrap());
-        let goal = surreal.select::<Option<I18n>>(thing).await?;
+        let goal = surreal.select::<Option<super::i18n::I18n>>(thing).await?;
 
         Ok(goal)
     }
 
     #[graphql(name = "interests")]
-    async fn interests_details(&self, context: &Context<'_>) -> FieldResult<Vec<I18n>> {
+    async fn interests_details(
+        &self,
+        context: &Context<'_>,
+    ) -> FieldResult<Vec<super::i18n::I18n>> {
         let surreal = context.data::<Surreal<Client>>()?;
         let interests = self.interests.clone();
 
@@ -104,7 +107,7 @@ impl User {
 
         let query = surreal.query(query).await;
 
-        let interests = query?.take::<Vec<I18n>>(0)?;
+        let interests = query?.take::<Vec<super::i18n::I18n>>(0)?;
 
         Ok(interests)
     }
