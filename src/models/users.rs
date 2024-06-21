@@ -84,9 +84,15 @@ impl User {
             return Ok(None);
         }
 
-        let SurrealID(thing) = SurrealID::from(goal.unwrap());
-        let goal = surreal.select::<Option<super::i18n::I18n>>(thing).await?;
+        let query = format!("SELECT * FROM goal WHERE id = '{}';", goal.unwrap());
+        let query = surreal.query(query).await;
 
+        if let Err(e) = query {
+            tracing::error!("Error: {:?}", e);
+            return Err(e.into());
+        }
+
+        let goal = query?.take::<Option<super::i18n::I18n>>(0)?;
         Ok(goal)
     }
 
@@ -102,11 +108,11 @@ impl User {
             return Ok(vec![]);
         }
 
-        let interests = interests.unwrap();
-        let query = format!("SELECT * FROM interests WHERE id ∈ {:?};", interests);
-
+        let query = format!(
+            "SELECT * FROM interest WHERE id ∈ {:?};",
+            interests.unwrap()
+        );
         let query = surreal.query(query).await;
-
         let interests = query?.take::<Vec<super::i18n::I18n>>(0)?;
 
         Ok(interests)
