@@ -1,9 +1,12 @@
 use async_graphql::{Context, Subscription};
 use async_stream::stream;
-use surrealdb::{engine::remote::ws::Client, Notification, Result, Surreal};
+use surrealdb::{Notification, Result};
 use tokio_stream::Stream;
 
-use crate::{graphql::types::surreal_id::SurrealID, models::users::User};
+use crate::{
+    graphql::types::{surreal_id::SurrealID, SurrealClient},
+    models::users::User,
+};
 
 #[derive(Default)]
 pub struct UsersSubscriptionRoot;
@@ -16,7 +19,7 @@ impl UsersSubscriptionRoot {
         context: &'a Context<'_>,
         id: String,
     ) -> impl Stream<Item = Option<User>> + 'a {
-        let surreal = context.data::<Surreal<Client>>().unwrap();
+        let surreal = context.data::<SurrealClient>().unwrap();
         let SurrealID(thing) = SurrealID::from(id);
         let initial_data = surreal.select::<Option<User>>(&thing).await.unwrap();
         let stream = surreal.select::<Option<User>>(&thing).live().await.unwrap();

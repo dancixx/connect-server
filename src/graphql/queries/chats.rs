@@ -1,7 +1,6 @@
 use async_graphql::{Context, FieldResult, Object};
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::models::chats;
+use crate::{graphql::types::SurrealClient, models::chats};
 
 #[derive(Default)]
 pub struct ChatsQueryRoot;
@@ -15,7 +14,7 @@ impl ChatsQueryRoot {
         #[graphql(name = "user_id")] user_id: String,
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<Vec<chats::Chat>> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         // TODO: add pagination
         let query = format!(
             "

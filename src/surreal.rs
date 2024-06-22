@@ -1,14 +1,12 @@
 use std::env;
 
 use anyhow::Result;
-use surrealdb::{
-    engine::remote::ws::{Client, Ws},
-    opt::auth::Root,
-    Surreal,
-};
+use surrealdb::{engine::remote::ws::Ws, opt::auth::Root, Surreal};
 use surrealdb_migrations::MigrationRunner;
 
-pub async fn init() -> Result<Surreal<Client>> {
+use crate::graphql::types::SurrealClient;
+
+pub async fn init() -> Result<SurrealClient> {
     let surreal = Surreal::new::<Ws>("127.0.0.1:8000").await?;
     surreal
         .signin(Root {
@@ -25,7 +23,7 @@ pub async fn init() -> Result<Surreal<Client>> {
     Ok(surreal)
 }
 
-pub async fn run_migrations(surreal: &Surreal<Client>) -> Result<()> {
+pub async fn run_migrations(surreal: &SurrealClient) -> Result<()> {
     // Apply new migrations
     MigrationRunner::new(surreal).up().await.unwrap();
 

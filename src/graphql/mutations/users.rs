@@ -1,7 +1,9 @@
 use async_graphql::{Context, FieldResult, Object};
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{graphql::types::surreal_id::SurrealID, models::users};
+use crate::{
+    graphql::types::{surreal_id::SurrealID, SurrealClient},
+    models::users,
+};
 
 #[derive(Default)]
 pub struct UsersMutationRoot;
@@ -15,7 +17,7 @@ impl UsersMutationRoot {
         id: String,
         input: users::InsertInput,
     ) -> FieldResult<users::User> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let SurrealID(thing) = SurrealID::from(id);
         let user = surreal
             .create::<Option<users::User>>(thing)
@@ -32,7 +34,7 @@ impl UsersMutationRoot {
         id: String,
         #[graphql(name = "_set")] _set: users::UpdateSetInput,
     ) -> FieldResult<users::User> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let SurrealID(thing) = SurrealID::from(id);
 
         let user = surreal
@@ -50,7 +52,7 @@ impl UsersMutationRoot {
         id: String,
         coordinates: [f64; 2],
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
 
         let query = format!(
             "UPDATE {id} SET current_location = {{type: 'Point', coordinates: {coordinates:?}}}",
@@ -70,7 +72,7 @@ impl UsersMutationRoot {
         context: &Context<'_>,
         id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let SurrealID(thing) = SurrealID::from(id);
         surreal.delete::<Option<users::User>>(thing).await?;
 
@@ -84,7 +86,7 @@ impl UsersMutationRoot {
         #[graphql(name = "user_id")] user_id: String,
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let relate = format!(
             "RELATE {user_id}->user_edge->{user_target_id} SET in_swipe = true",
             user_id = user_id,
@@ -102,7 +104,7 @@ impl UsersMutationRoot {
         #[graphql(name = "user_id")] user_id: String,
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let relate = format!(
             "RELATE {user_id}->user_edge->{target_user_id} SET in_swipe = false",
             user_id = user_id,
@@ -120,7 +122,7 @@ impl UsersMutationRoot {
         #[graphql(name = "user_id")] user_id: String,
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let relate = format!(
             "RELATE {user_id}->user_edge->{user_target_id} SET in_swipe = true, is_super_swipe = true",
             user_id = user_id,
@@ -138,7 +140,7 @@ impl UsersMutationRoot {
         #[graphql(name = "user_id")] user_id: String,
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             "UPDATE user_edge MERGE {{ out_swipe: true }} WHERE in = {user_id} AND out = {target_user_id}",
             user_id = user_id,
@@ -156,7 +158,7 @@ impl UsersMutationRoot {
         #[graphql(name = "user_id")] user_id: String,
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             "DELETE user_edge WHERE in = {user_id} AND out = {target_user_id}",
             user_id = user_id,

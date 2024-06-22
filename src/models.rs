@@ -1,3 +1,4 @@
+pub mod ai;
 pub mod chats;
 pub mod goals;
 pub mod i18n;

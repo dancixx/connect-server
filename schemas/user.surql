@@ -18,17 +18,33 @@ DEFINE FIELD current_location ON user TYPE option<point> PERMISSIONS FULL;
 DEFINE FIELD max_distance ON user TYPE number DEFAULT 25 PERMISSIONS FULL;
 DEFINE FIELD age_range ON user TYPE option<array<number>> PERMISSIONS FULL;
 DEFINE FIELD max_match_count ON user TYPE number DEFAULT 10 PERMISSIONS FULL;
+###########################
+DEFINE FIELD education ON user TYPE option<string> PERMISSIONS FULL;
+DEFINE FIELD job ON user TYPE option<string> PERMISSIONS FULL;
+DEFINE FIELD alcohol ON user TYPE option<string> PERMISSIONS FULL;
+DEFINE FIELD smoking ON user TYPE bool DEFAULT false PERMISSIONS FULL;
+DEFINE FIELD political_views ON user TYPE option<string> PERMISSIONS FULL;
+DEFINE FIELD religion ON user TYPE option<string> PERMISSIONS FULL;
+DEFINE FIELD spoken_languages ON user TYPE option<array<string>> PERMISSIONS FULL;
+DEFINE FIELD app_language ON user TYPE option<string> PERMISSIONS FULL;
+DEFINE FIELD zodiac ON user TYPE option<string> PERMISSIONS FULL;
+###########################
 DEFINE FIELD has_pet ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD has_car ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD has_house ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD need_pet ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD need_car ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD need_house ON user TYPE bool DEFAULT false PERMISSIONS FULL;
-DEFINE FIELD open_for_travel_together ON user TYPE bool DEFAULT false PERMISSIONS FULL;
+###########################
+DEFINE FIELD has_kids ON user TYPE bool DEFAULT false PERMISSIONS FULL;
+DEFINE FIELD want_kids ON user TYPE option<bool> PERMISSIONS FULL;
+###########################
+DEFINE FIELD spontaneous_travel ON user TYPE bool DEFAULT false PERMISSIONS FULL;
+###########################
 DEFINE FIELD is_registration_completed ON user TYPE bool DEFAULT false PERMISSIONS FULL;
-DEFINE FIELD is_paid_travel ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD is_verified ON user TYPE bool DEFAULT false PERMISSIONS FULL;
 DEFINE FIELD is_banned ON user TYPE bool DEFAULT false PERMISSIONS FULL;
+###########################
 DEFINE FIELD created_at ON user TYPE datetime DEFAULT time::now() PERMISSIONS FULL;
 DEFINE FIELD updated_at ON user TYPE datetime VALUE time::now() PERMISSIONS FULL;
 

@@ -1,7 +1,9 @@
 use async_graphql::{Context, FieldResult, Object};
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::models::i18n::I18n;
+use crate::{
+    graphql::types::{I18nTables, SurrealClient},
+    models::i18n::I18n,
+};
 
 #[derive(Default)]
 pub struct InterestsQueryRoot;
@@ -14,8 +16,12 @@ impl InterestsQueryRoot {
         context: &Context<'_>,
         #[graphql(name = "order_key", default = "en")] order_key: String,
     ) -> FieldResult<Vec<I18n>> {
-        let surreal = context.data::<Surreal<Client>>()?;
-        let query = format!("SELECT * FROM interest ORDER BY {}", order_key);
+        let surreal = context.data::<SurrealClient>()?;
+        let query = format!(
+            "SELECT * FROM {} ORDER BY {}",
+            I18nTables::i18n_interest,
+            order_key
+        );
         let query = surreal.query(query).await;
 
         if let Err(e) = query {

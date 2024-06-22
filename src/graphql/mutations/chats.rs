@@ -1,8 +1,10 @@
 use async_graphql::{Context, FieldResult, Object};
 use serde_json::json;
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{graphql::types::surreal_id::SurrealID, models::chats};
+use crate::{
+    graphql::types::{surreal_id::SurrealID, SurrealClient},
+    models::chats,
+};
 
 #[derive(Default)]
 pub struct ChatsMutationRoot;
@@ -17,7 +19,7 @@ impl ChatsMutationRoot {
         #[graphql(name = "target_user_id")] target_user_id: String,
         message: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             r#"
             LET $in = {user_id};
@@ -47,7 +49,7 @@ impl ChatsMutationRoot {
         id: String,
         #[graphql(name = "_set")] _set: chats::UpdateSetInput,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let SurrealID(thing) = SurrealID::from(id);
 
         surreal
@@ -64,7 +66,7 @@ impl ChatsMutationRoot {
         context: &Context<'_>,
         id: String,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let SurrealID(thing) = SurrealID::from(id);
         surreal.delete::<Option<chats::Chat>>(thing).await?;
 
@@ -78,7 +80,7 @@ impl ChatsMutationRoot {
         ids: Vec<String>,
         #[graphql(name = "_set")] _set: chats::UpdateSetInput,
     ) -> FieldResult<String> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             "UPDATE chat_message MERGE {_set} WHERE id IN {ids:?};",
             _set = json!(_set),

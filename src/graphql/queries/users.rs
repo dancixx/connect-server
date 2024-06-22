@@ -1,7 +1,9 @@
 use async_graphql::{Context, FieldResult, Object};
-use surrealdb::{engine::remote::ws::Client, Surreal};
 
-use crate::{graphql::types::surreal_id::SurrealID, models::users};
+use crate::{
+    graphql::types::{surreal_id::SurrealID, SurrealClient},
+    models::users,
+};
 
 #[derive(Default)]
 pub struct UsersQueryRoot;
@@ -16,7 +18,7 @@ impl UsersQueryRoot {
         #[graphql(default = 20)] limit: i32,
         #[graphql(default = 0)] offset: i32,
     ) -> FieldResult<Vec<users::User>> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             // This query has two parts:
             // 1. Get the users that the current user has swiped on
@@ -46,7 +48,7 @@ impl UsersQueryRoot {
         context: &Context<'_>,
         id: String,
     ) -> FieldResult<Option<users::User>> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let SurrealID(thing) = SurrealID::from(id);
         let user = surreal.select::<Option<users::User>>(thing).await?;
         Ok(user)
@@ -58,7 +60,7 @@ impl UsersQueryRoot {
         context: &Context<'_>,
         #[graphql(name = "user_id")] user_id: String,
     ) -> FieldResult<Vec<users::User>> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             "array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe != true)->user.* AS users FROM {}).users;",
             user_id
@@ -79,7 +81,7 @@ impl UsersQueryRoot {
         context: &Context<'_>,
         #[graphql(name = "user_id")] user_id: String,
     ) -> FieldResult<Vec<users::User>> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         let query = format!(
             "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe != true)<-user.* AS users FROM {}).users;",
             user_id
@@ -100,7 +102,7 @@ impl UsersQueryRoot {
         context: &Context<'_>,
         #[graphql(name = "user_id")] user_id: String,
     ) -> FieldResult<Vec<users::User>> {
-        let surreal = context.data::<Surreal<Client>>()?;
+        let surreal = context.data::<SurrealClient>()?;
         // TODO: improve this query
         // TODO: order by created_at
         let query = format!(
