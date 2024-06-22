@@ -6,12 +6,20 @@ use crate::graphql::types::surreal_id::SurrealID;
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
 pub struct I18n {
     pub id: SurrealID,
-    pub en: String,
-    pub de: String,
-    pub es: String,
-    pub fr: String,
-    pub it: String,
-    pub ja: String,
-    pub zh: String,
-    pub hu: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub en: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub de: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub es: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fr: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub it: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ja: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub zh: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hu: Option<String>,
 }

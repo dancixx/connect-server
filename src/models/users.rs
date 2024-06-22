@@ -116,7 +116,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id = '{}';",
+            "SELECT id,{} FROM {} WHERE id = '{}';",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_goal,
             goal.unwrap()
         );
@@ -144,7 +145,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id ∈ {:?};",
+            "SELECT id,{} FROM {} WHERE id ∈ {:?};",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_interest,
             interests.unwrap()
         );
@@ -167,7 +169,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id = '{}';",
+            "SELECT id,{} FROM {} WHERE id = '{}';",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_education,
             education.unwrap()
         );
@@ -195,7 +198,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id = '{}';",
+            "SELECT id,{} FROM {} WHERE id = '{}';",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_alcohol,
             alcohol.unwrap()
         );
@@ -223,7 +227,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id = '{}';",
+            "SELECT id,{} FROM {} WHERE id = '{}';",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_political,
             political_views.unwrap()
         );
@@ -251,7 +256,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id = '{}';",
+            "SELECT id,{} FROM {} WHERE id = '{}';",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_religion,
             religion.unwrap()
         );
@@ -279,7 +285,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id ∈ {:?};",
+            "SELECT id,{} FROM {} WHERE id ∈ {:?};",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_language,
             spoken_languages.unwrap()
         );
@@ -302,7 +309,8 @@ impl User {
         }
 
         let query = format!(
-            "SELECT * FROM {} WHERE id = '{}';",
+            "SELECT id,{} FROM {} WHERE id = '{}';",
+            self.app_language.as_ref().unwrap_or(&"en".to_string()),
             I18nTables::i18n_zodiac,
             zodiac.unwrap()
         );
