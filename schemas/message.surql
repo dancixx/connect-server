@@ -1,7 +1,7 @@
-DEFINE TABLE message TYPE RELATION FROM user_edge USER user SCHEMAFULL PERMISSIONS none;
+DEFINE TABLE message TYPE RELATION FROM match TO user SCHEMAFULL PERMISSIONS none;
 
 DEFINE FIELD id ON message TYPE record<message>;
-DEFINE FIELD in ON message TYPE record<user_edge>;
+DEFINE FIELD in ON message TYPE record<match>;
 DEFINE FIELD out ON message TYPE record<user>;
 DEFINE FIELD text ON message TYPE option<string>;
 DEFINE FIELD reaction ON message TYPE option<string>;
