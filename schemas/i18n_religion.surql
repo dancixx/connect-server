@@ -1,10 +1,11 @@
-DEFINE TABLE i18n_religion TYPE ANY SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE i18n_religion TYPE NORMAL SCHEMAFULL PERMISSIONS none;
 
-DEFINE FIELD en ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD de ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD es ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD fr ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD it ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD zh ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD ja ON i18n_religion TYPE string PERMISSIONS FULL;
-DEFINE FIELD hu ON i18n_religion TYPE string PERMISSIONS FULL;
+DEFINE FIELD id ON i18n_religion TYPE record<i18n_religion>;
+DEFINE FIELD en ON i18n_religion TYPE string;
+DEFINE FIELD de ON i18n_religion TYPE string;
+DEFINE FIELD es ON i18n_religion TYPE string;
+DEFINE FIELD fr ON i18n_religion TYPE string;
+DEFINE FIELD it ON i18n_religion TYPE string;
+DEFINE FIELD zh ON i18n_religion TYPE string;
+DEFINE FIELD ja ON i18n_religion TYPE string;
+DEFINE FIELD hu ON i18n_religion TYPE string;

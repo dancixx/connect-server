@@ -1,5 +1,6 @@
-DEFINE TABLE user_image SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE user_image TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
 
+DEFINE FIELD id ON user_image TYPE record<user_image>;
 DEFINE FIELD height ON user_image TYPE int;
 DEFINE FIELD width ON user_image TYPE int;
 DEFINE FIELD url ON user_image TYPE string;
