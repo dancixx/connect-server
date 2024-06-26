@@ -88,7 +88,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
         let relate = format!(
-            "RELATE {user_id}->user_edge->{user_target_id} SET in_swipe = true",
+            "RELATE {user_id}->match->{user_target_id} SET in_swipe = true",
             user_id = user_id,
             user_target_id = target_user_id
         );
@@ -106,7 +106,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
         let relate = format!(
-            "RELATE {user_id}->user_edge->{target_user_id} SET in_swipe = false",
+            "RELATE {user_id}->match->{target_user_id} SET in_swipe = false",
             user_id = user_id,
             target_user_id = target_user_id
         );
@@ -124,7 +124,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
         let relate = format!(
-            "RELATE {user_id}->user_edge->{user_target_id} SET in_swipe = true, is_super_swipe = true",
+            "RELATE {user_id}->match->{user_target_id} SET in_swipe = true, is_super_swipe = true",
             user_id = user_id,
             user_target_id = target_user_id
         );
@@ -142,7 +142,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
         let query = format!(
-            "UPDATE user_edge MERGE {{ out_swipe: true }} WHERE in = {user_id} AND out = {target_user_id}",
+            "UPDATE match MERGE {{ out_swipe: true }} WHERE in = {user_id} AND out = {target_user_id}",
             user_id = user_id,
             target_user_id = target_user_id
         );
@@ -160,7 +160,7 @@ impl UsersMutationRoot {
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
         let query = format!(
-            "DELETE user_edge WHERE in = {user_id} AND out = {target_user_id}",
+            "DELETE match WHERE in = {user_id} AND out = {target_user_id}",
             user_id = user_id,
             target_user_id = target_user_id
         );

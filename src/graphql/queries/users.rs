@@ -24,7 +24,7 @@ impl UsersQueryRoot {
             // 1. Get the users that the current user has swiped on
             // 2. Get the users that the current user has not swiped on
             "
-                LET $swiped = (array::first((SELECT ->(user_edge WHERE in_swipe = true)->user AS users FROM {0})).users);
+                LET $swiped = (array::first((SELECT ->(match WHERE in_swipe = true)->user AS users FROM {0})).users);
                 SELECT * FROM user WHERE (id ∉ $swiped && (id != {0})) LIMIT {1} START {2};
             ",
             user_id, limit, offset
@@ -62,7 +62,7 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<SurrealClient>()?;
         let query = format!(
-            "array::first(SELECT ->(user_edge WHERE in_swipe = true && out_swipe != true)->user.* AS users FROM {}).users;",
+            "array::first(SELECT ->(match WHERE in_swipe = true && out_swipe != true)->user.* AS users FROM {}).users;",
             user_id
         );
 
@@ -83,7 +83,7 @@ impl UsersQueryRoot {
     ) -> FieldResult<Vec<users::User>> {
         let surreal = context.data::<SurrealClient>()?;
         let query = format!(
-            "array::first(SELECT <-(user_edge WHERE in_swipe = true && out_swipe != true)<-user.* AS users FROM {}).users;",
+            "array::first(SELECT <-(match WHERE in_swipe = true && out_swipe != true)<-user.* AS users FROM {}).users;",
             user_id
         );
 
@@ -108,13 +108,8 @@ impl UsersQueryRoot {
         let query = format!(
             "
             LET $id = {0};
-            SELECT *, 
-            (
-                SELECT * FROM <-chat_message_user_edge<-chat_message ORDER BY created_at DESC LIMIT 1
-            )[0] as last_message
-            FROM 
-            $id->(user_edge WHERE in_swipe = true && out_swipe = true)->user.* || 
-            $id<-(user_edge WHERE in_swipe = true && out_swipe = true)<-user.*
+            $id->(match WHERE in_swipe = true && out_swipe = true)->user.* || 
+            $id<-(match WHERE in_swipe = true && out_swipe = true)<-user.*
             ",
             user_id
         );
