@@ -6,6 +6,8 @@ use crate::graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::Surre
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
 pub struct Message {
     pub id: SurrealID,
+    pub r#in: SurrealID,
+    pub out: SurrealID,
     #[graphql(name = "created_at")]
     pub created_at: SurrealDateTime,
     #[graphql(name = "is_deleted")]

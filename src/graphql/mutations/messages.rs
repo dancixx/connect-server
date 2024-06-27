@@ -25,7 +25,7 @@ impl MessageMutationRoot {
             LET $in = {user_id};
             LET $out = {target_user_id};
             LET $match_id = SELECT id FROM match WHERE (in = {user_id} && out = {target_user_id}) || (in = {target_user_id} && out = {user_id});
-            RELATE $match_id->(INSERT INTO message {{text: "{text}"}});
+            RELATE $match_id->message->{user_id} SET text = "{text}";
             "#,
             user_id = user_id,
             target_user_id = target_user_id,

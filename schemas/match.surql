@@ -11,9 +11,9 @@ DEFINE FIELD unmatched_at ON match TYPE option<datetime>;
 DEFINE FIELD message_count ON match 
     VALUE <future> {array::len(SELECT count() FROM message WHERE $this.in = $parent.id)};
 DEFINE FIELD unread_message_count_by_in ON match 
-    VALUE <future> {array::len(SELECT count() FROM message WHERE $this.out = $parent.in && !$this.is_read)};
-DEFINE FIELD unread_message_count_by_out ON match
     VALUE <future> {array::len(SELECT count() FROM message WHERE $this.out = $parent.out && !$this.is_read)};
+DEFINE FIELD unread_message_count_by_out ON match
+    VALUE <future> {array::len(SELECT count() FROM message WHERE $this.out = $parent.in && !$this.is_read)};
 DEFINE FIELD chat_disabled_by_in ON match TYPE bool DEFAULT false;
 DEFINE FIELD chat_disabled_by_out ON match TYPE bool DEFAULT false;
 DEFINE FIELD created_at ON match TYPE datetime DEFAULT time::now();
