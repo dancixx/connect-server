@@ -6,10 +6,10 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct UsersQueryRoot;
+pub struct UserQueryRoot;
 
 #[Object]
-impl UsersQueryRoot {
+impl UserQueryRoot {
     #[graphql(name = "select_users")]
     async fn select_users(
         &self,

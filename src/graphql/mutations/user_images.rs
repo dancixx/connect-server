@@ -1,10 +1,10 @@
 use async_graphql::*;
 
 #[derive(Default)]
-pub struct UserImagesMutationRoot;
+pub struct UserImageMutationRoot;
 
 #[Object]
-impl UserImagesMutationRoot {
+impl UserImageMutationRoot {
     #[graphql(name = "insert_user_images")]
     async fn insert_user_images(
         &self,

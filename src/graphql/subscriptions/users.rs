@@ -9,10 +9,10 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct UsersSubscriptionRoot;
+pub struct UserSubscriptionRoot;
 
 #[Subscription]
-impl UsersSubscriptionRoot {
+impl UserSubscriptionRoot {
     #[graphql(name = "subscribe_users_by_id")]
     pub async fn subscribe_users_by_id<'a>(
         &self,

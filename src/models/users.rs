@@ -101,7 +101,7 @@ pub struct User {
     pub updated_at: SurrealDateTime,
 
     #[graphql(name = "last_message")]
-    pub last_message: Option<super::chats::Chat>,
+    pub last_message: Option<super::messages::Message>,
 }
 
 #[ComplexObject]

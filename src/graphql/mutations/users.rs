@@ -6,10 +6,10 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct UsersMutationRoot;
+pub struct UserMutationRoot;
 
 #[Object]
-impl UsersMutationRoot {
+impl UserMutationRoot {
     #[graphql(name = "insert_users_one")]
     async fn insert_users_one(
         &self,

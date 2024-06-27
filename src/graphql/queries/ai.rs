@@ -3,7 +3,7 @@ use std::vec;
 use async_graphql::{Context, FieldResult, Object};
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
-    CreateChatCompletionRequestArgs, CreateCompletionRequest, CreateCompletionRequestArgs,
+    CreateChatCompletionRequestArgs,
 };
 
 use crate::{
