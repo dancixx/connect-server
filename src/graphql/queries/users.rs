@@ -24,8 +24,11 @@ impl UserQueryRoot {
             // 1. Get the users that the current user has swiped on
             // 2. Get the users that the current user has not swiped on
             "
-                LET $swiped = (array::first((SELECT ->(match WHERE in_swipe = true)->user AS users FROM {0})).users);
-                SELECT * FROM user WHERE (id ∉ $swiped && (id != {0})) LIMIT {1} START {2};
+                LET $swiped = (SELECT out FROM match WHERE in = {0}).out;
+                LET $match = (SELECT in FROM match WHERE out = {0}).in;
+                LET $ids = array::concat($swiped, $match);
+                LET $ids = array::add($ids, {0});
+                SELECT * FROM user WHERE id ∉ $ids LIMIT {1} START {2};
             ",
             user_id, limit, offset
         );
@@ -37,7 +40,7 @@ impl UserQueryRoot {
         }
 
         // This query has two parts and this is the reason why we are using take::<Vec<users::User>>(1)
-        let users = query?.take::<Vec<users::User>>(1)?;
+        let users = query?.take::<Vec<users::User>>(4)?;
 
         Ok(users)
     }

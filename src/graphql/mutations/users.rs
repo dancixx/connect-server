@@ -2,7 +2,7 @@ use async_graphql::{Context, FieldResult, Object};
 
 use crate::{
     graphql::types::{surreal_id::SurrealID, SurrealClient},
-    models::users,
+    models::{r#match::Match, users},
 };
 
 #[derive(Default)]
@@ -87,12 +87,31 @@ impl UserMutationRoot {
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
-        let relate = format!(
-            "RELATE {user_id}->match->{user_target_id} SET in_swipe = true",
-            user_id = user_id,
-            user_target_id = target_user_id
+        tracing::info!("User ID: {:?}", user_id);
+        tracing::info!("Target User ID: {:?}", target_user_id);
+        let query = format!(
+            "array::first(SELECT * FROM match WHERE in = {target_user_id} && out = {user_id});",
+            user_id = user_id
         );
-        surreal.query(relate).await?;
+
+        let mut response = surreal.query(query).await?;
+        let response = response.take::<Option<Match>>(0)?;
+        tracing::info!("Match: {:?}", response);
+        let q: String;
+
+        if let Some(r#match) = response {
+            q = format!(
+                "UPDATE {match_id} SET out_swipe = true;",
+                match_id = *r#match.id.unwrap()
+            );
+        } else {
+            q = format!(
+                "RELATE {user_id}->match->{user_target_id} SET in_swipe = true",
+                user_id = user_id,
+                user_target_id = target_user_id
+            )
+        }
+        surreal.query(q).await?;
 
         Ok(String::from("User swiped right"))
     }

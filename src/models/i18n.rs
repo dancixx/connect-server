@@ -3,9 +3,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::graphql::types::surreal_id::SurrealID;
 
-#[derive(SimpleObject, Serialize, Deserialize, Debug)]
+#[derive(SimpleObject, Serialize, Deserialize, Debug, Default)]
 pub struct I18n {
-    pub id: SurrealID,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<SurrealID>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub en: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
