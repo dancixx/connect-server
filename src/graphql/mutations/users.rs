@@ -102,7 +102,7 @@ impl UserMutationRoot {
         if let Some(r#match) = response {
             q = format!(
                 "UPDATE {match_id} SET out_swipe = true;",
-                match_id = *r#match.id.unwrap()
+                match_id = *r#match.id
             );
         } else {
             q = format!(
