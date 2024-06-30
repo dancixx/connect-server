@@ -18,15 +18,15 @@ impl MessageQueryRoot {
         // TODO: add pagination
         let query = format!(
             "
-            LET $match_id = SELECT id FROM match WHERE (in = {user_id} && out = {target_user_id}) || (in = {target_user_id} && out = {user_id});
-            LET $match_id = array::first($match_id);
-            SELECT *, out.* as user FROM $match_id->message ORDER BY created_at DESC;
+            LET $chat = SELECT id FROM match WHERE (in = {0} && out = {1}) || (in = {1} && out = {0});
+            LET $match_id = array::first($chat).id;
+            SELECT *, out.* as user FROM message WHERE in = $match_id ORDER BY created_at DESC;
             ",
-            user_id = user_id,
-            target_user_id = target_user_id
+            user_id,
+            target_user_id
         );
-
         let query = surreal.query(query).await;
+
         if let Err(e) = query {
             tracing::error!("Error: {:?}", e);
             return Err(e.into());

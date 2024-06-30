@@ -2,7 +2,7 @@ use async_graphql::scalar;
 use geo_types::Point;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SurrealPoint(pub Point);
 
 scalar!(

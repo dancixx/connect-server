@@ -4,7 +4,7 @@ use async_graphql::{Scalar, ScalarType, TypeName};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SurrealID(pub Thing);
 
 impl From<String> for SurrealID {

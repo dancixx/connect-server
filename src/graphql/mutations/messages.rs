@@ -15,20 +15,15 @@ impl MessageMutationRoot {
     async fn insert_message_one(
         &self,
         context: &Context<'_>,
+        #[graphql(name = "match_id")] match_id: String,
         #[graphql(name = "user_id")] user_id: String,
-        #[graphql(name = "target_user_id")] target_user_id: String,
         text: String,
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
         let query = format!(
-            r#"
-            LET $in = {user_id};
-            LET $out = {target_user_id};
-            LET $match_id = SELECT id FROM match WHERE (in = {user_id} && out = {target_user_id}) || (in = {target_user_id} && out = {user_id});
-            RELATE $match_id->message->{user_id} SET text = "{text}";
-            "#,
-            user_id = user_id,
-            target_user_id = target_user_id,
+            r#"RELATE {0}->message->{1} SET text = "{text}";"#,
+            match_id,
+            user_id,
             text = text
         );
         let query = surreal.query(query).await;

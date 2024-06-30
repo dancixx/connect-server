@@ -3,14 +3,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID};
 
+use super::users;
+
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
 pub struct Match {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<SurrealID>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#in: Option<SurrealID>,
+    pub r#in: Option<Box<users::User>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub out: Option<SurrealID>,
+    pub out: Option<Box<users::User>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[graphql(name = "in_swipe")]
     pub in_swipe: Option<bool>,

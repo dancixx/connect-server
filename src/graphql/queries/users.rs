@@ -2,7 +2,7 @@ use async_graphql::{Context, FieldResult, Object};
 
 use crate::{
     graphql::types::{surreal_id::SurrealID, SurrealClient},
-    models::users,
+    models::{r#match, users},
 };
 
 #[derive(Default)]
@@ -104,16 +104,12 @@ impl UserQueryRoot {
         &self,
         context: &Context<'_>,
         #[graphql(name = "user_id")] user_id: String,
-    ) -> FieldResult<Vec<users::User>> {
+    ) -> FieldResult<Vec<r#match::Match>> {
         let surreal = context.data::<SurrealClient>()?;
         // TODO: improve this query
         // TODO: order by created_at
         let query = format!(
-            "
-            LET $id = {0};
-            $id->(match WHERE in_swipe = true && out_swipe = true)->user.* || 
-            $id<-(match WHERE in_swipe = true && out_swipe = true)<-user.*
-            ",
+            "SELECT *, in.*, out.* FROM match WHERE (in = {0} || out = {0}) && (in_swipe = true && out_swipe = true) ORDER BY created_at DESC;",
             user_id
         );
 
@@ -123,6 +119,6 @@ impl UserQueryRoot {
             return Err(e.into());
         }
 
-        Ok(query?.take::<Vec<users::User>>(1)?)
+        Ok(query?.take::<Vec<r#match::Match>>(0)?)
     }
 }

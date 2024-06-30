@@ -10,7 +10,7 @@ use crate::{
     },
 };
 
-#[derive(SimpleObject, Serialize, Deserialize, Debug)]
+#[derive(SimpleObject, Serialize, Deserialize, Debug, Clone)]
 #[graphql(complex)]
 pub struct User {
     pub id: SurrealID,

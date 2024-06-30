@@ -21,11 +21,11 @@ impl UserSubscriptionRoot {
     ) -> impl Stream<Item = Option<User>> + 'a {
         let surreal = context.data::<SurrealClient>().unwrap();
         let SurrealID(thing) = SurrealID::from(id);
-        let initial_data = surreal.select::<Option<User>>(&thing).await.unwrap();
-        let stream = surreal.select::<Option<User>>(&thing).live().await.unwrap();
+        let query = surreal.select(&thing).await.unwrap();
+        let stream = surreal.select(&thing).live().await.unwrap();
 
         stream! {
-            yield initial_data;
+            yield query;
 
             for await result in stream {
                 let result: Result<Notification<User>> = result;
