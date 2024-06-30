@@ -87,8 +87,6 @@ impl UserMutationRoot {
         #[graphql(name = "target_user_id")] target_user_id: String,
     ) -> FieldResult<String> {
         let surreal = context.data::<SurrealClient>()?;
-        tracing::info!("User ID: {:?}", user_id);
-        tracing::info!("Target User ID: {:?}", target_user_id);
         let query = format!(
             "array::first(SELECT * FROM match WHERE in = {target_user_id} && out = {user_id});",
             user_id = user_id
@@ -96,7 +94,6 @@ impl UserMutationRoot {
 
         let mut response = surreal.query(query).await?;
         let response = response.take::<Option<Match>>(0)?;
-        tracing::info!("Match: {:?}", response);
         let q: String;
 
         if let Some(r#match) = response {

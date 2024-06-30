@@ -1,6 +1,5 @@
 use async_graphql::{ComplexObject, Context, FieldResult, SimpleObject};
 use serde::{Deserialize, Serialize};
-use surrealdb::method::Content;
 
 use crate::graphql::types::{
     surreal_datetime::SurrealDateTime, surreal_id::SurrealID, SurrealClient,
@@ -53,6 +52,9 @@ pub struct Match {
 
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
+
+    #[graphql(skip)]
+    last_message: Option<SurrealID>,
 }
 
 #[ComplexObject]
@@ -60,7 +62,17 @@ impl Match {
     #[graphql(name = "last_message")]
     pub async fn last_message(&self, context: &Context<'_>) -> FieldResult<Option<Message>> {
         let surreal = context.data::<SurrealClient>()?;
+        let id = self.last_message.as_ref();
 
-        todo!()
+        if id.is_none() {
+            return Ok(None);
+        }
+
+        let SurrealID(thing) = id.unwrap();
+        let query = format!("SELECT *, out.* as user FROM {0};", thing.to_string());
+        let mut message = surreal.query(query).await?;
+        let message = message.take::<Option<Message>>(0)?;
+
+        Ok(message)
     }
 }
