@@ -21,6 +21,9 @@ pub struct Message {
     #[graphql(name = "is_deleted")]
     pub is_deleted: bool,
 
+    #[graphql(name = "is_reported")]
+    pub is_reported: bool,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     #[graphql(name = "read_at")]
     pub read_at: Option<SurrealDateTime>,
@@ -40,20 +43,20 @@ pub struct UpdateSetInput {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
 
-    #[graphql(name = "is_deleted")]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[graphql(name = "is_deleted")]
     pub is_deleted: Option<bool>,
 
-    #[graphql(name = "is_reported")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_reported: Option<bool>,
-
     #[graphql(name = "is_read")]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub is_read: Option<bool>,
 
-    #[graphql(name = "read_at")]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[graphql(name = "is_reported")]
+    pub is_reported: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[graphql(name = "read_at")]
     pub read_at: Option<SurrealDateTime>,
 
     #[serde(skip_serializing_if = "Option::is_none")]

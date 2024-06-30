@@ -1,11 +1,15 @@
-use async_graphql::SimpleObject;
+use async_graphql::{ComplexObject, Context, FieldResult, SimpleObject};
 use serde::{Deserialize, Serialize};
+use surrealdb::method::Content;
 
-use crate::graphql::types::{surreal_datetime::SurrealDateTime, surreal_id::SurrealID};
+use crate::graphql::types::{
+    surreal_datetime::SurrealDateTime, surreal_id::SurrealID, SurrealClient,
+};
 
-use super::users;
+use super::{messages::Message, users};
 
 #[derive(SimpleObject, Serialize, Deserialize, Debug)]
+#[graphql(complex)]
 pub struct Match {
     pub id: SurrealID,
     pub r#in: Box<users::User>,
@@ -38,15 +42,25 @@ pub struct Match {
     #[graphql(name = "unread_message_count_by_out")]
     pub unread_message_count_by_out: Option<usize>,
 
-    #[graphql(name = "chat_disabled_by_in")]
-    pub chat_disabled_by_in: bool,
+    #[graphql(name = "disabled_by_in")]
+    pub disabled_by_in: bool,
 
-    #[graphql(name = "chat_disabled_by_out")]
-    pub chat_disabled_by_out: bool,
+    #[graphql(name = "disabled_by_out")]
+    pub disabled_by_out: bool,
 
     #[graphql(name = "created_at")]
     pub created_at: SurrealDateTime,
 
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
+}
+
+#[ComplexObject]
+impl Match {
+    #[graphql(name = "last_message")]
+    pub async fn last_message(&self, context: &Context<'_>) -> FieldResult<Option<Message>> {
+        let surreal = context.data::<SurrealClient>()?;
+
+        todo!()
+    }
 }
