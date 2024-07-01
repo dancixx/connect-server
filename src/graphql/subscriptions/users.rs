@@ -12,8 +12,8 @@ pub struct UserSubscriptionRoot;
 
 #[Subscription]
 impl UserSubscriptionRoot {
-    #[graphql(name = "subscribe_users_by_id")]
-    pub async fn subscribe_users_by_id<'a>(
+    #[graphql(name = "select_users_by_id")]
+    pub async fn select_users_by_id<'a>(
         &self,
         context: &'a Context<'_>,
         id: String,

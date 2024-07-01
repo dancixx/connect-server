@@ -49,5 +49,11 @@ DEFINE FIELD is_banned ON user TYPE bool DEFAULT false;
 DEFINE FIELD created_at ON user TYPE datetime DEFAULT time::now();
 DEFINE FIELD updated_at ON user TYPE datetime VALUE time::now();
 
+DEFINE FIELD match_count ON user
+    VALUE <future> {
+        array::len(SELECT VALUE id FROM match WHERE ($this.in = $parent.id || $this.out = $parent.id) && in_swipe = true && out_swipe = true)
+        };
+
 DEFINE INDEX user_email_index ON user FIELDS email UNIQUE;
 DEFINE INDEX user_name_index ON user FIELDS username UNIQUE;
+

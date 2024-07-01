@@ -124,6 +124,9 @@ pub struct User {
 
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
+
+    #[graphql(name = "match_count")]
+    pub match_count: Option<i32>,
 }
 
 #[ComplexObject]

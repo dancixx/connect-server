@@ -11,3 +11,9 @@ DEFINE FIELD is_reported ON message TYPE bool DEFAULT false;
 DEFINE FIELD read_at ON message TYPE option<datetime>;
 DEFINE FIELD created_at ON message TYPE datetime DEFAULT time::now();
 DEFINE FIELD updated_at ON message TYPE datetime VALUE time::now();
+
+# TODO: still buggy
+#REMOVE EVENT IF EXISTS message_read_at ON message;
+#DEFINE EVENT message_read_at ON message WHEN $event = "UPDATE" && $after.is_read = true THEN (
+#    UPDATE message SET read_at = time::now() WHERE id = $after.id
+#);

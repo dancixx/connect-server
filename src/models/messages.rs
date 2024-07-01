@@ -34,7 +34,8 @@ pub struct Message {
     #[graphql(name = "updated_at")]
     pub updated_at: SurrealDateTime,
 
-    pub user: Box<User>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user: Option<Box<User>>,
 }
 
 #[derive(InputObject, Serialize, Deserialize, Debug, Default)]
