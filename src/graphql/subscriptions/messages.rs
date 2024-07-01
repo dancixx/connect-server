@@ -2,7 +2,7 @@ use std::{collections::VecDeque, sync::Arc};
 
 use async_graphql::{Context, Subscription};
 use async_stream::stream;
-use surrealdb::{Action, Notification, Result};
+use surrealdb::{Action, Notification};
 use tokio::sync::Mutex;
 use tokio_stream::Stream;
 
@@ -48,8 +48,6 @@ impl MessageSubscriptionRoot {
             yield Some(messages.lock().await.clone());
 
             for await result in stream_messages {
-                let result: Result<Notification<messages::Message>> = result;
-
                 yield match result {
                     Ok(notification) => {
                         let message = notification.data;

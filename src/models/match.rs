@@ -69,7 +69,7 @@ impl Match {
         }
 
         let SurrealID(thing) = id.unwrap();
-        let query = format!("SELECT *, out.* as user FROM {0};", thing.to_string());
+        let query = format!("SELECT *, out.* as user FROM {0};", thing);
         let mut message = surreal.query(query).await?;
         let message = message.take::<Option<Message>>(0)?;
 

@@ -1,6 +1,5 @@
 use async_graphql::{Context, Subscription};
 use async_stream::stream;
-use surrealdb::{Notification, Result};
 use tokio_stream::Stream;
 
 use crate::{
@@ -28,8 +27,6 @@ impl UserSubscriptionRoot {
             yield query;
 
             for await result in stream {
-                let result: Result<Notification<User>> = result;
-
                 yield match result {
                     Ok(notification) => Some(notification.data),
                     Err(_) => None,
